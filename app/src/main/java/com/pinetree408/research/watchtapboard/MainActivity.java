@@ -45,7 +45,7 @@ public class MainActivity extends Activity {
     // 0 : tapboard
     // 1 : result based
     // 2 : input based
-    int keyboardMode = 2;
+    int keyboardMode = 0;
     Toast toast;
     TextView startView;
     View taskView;
@@ -103,7 +103,7 @@ public class MainActivity extends Activity {
             }
         };
         listview.setAdapter(adapter);
-        listview.setBackgroundColor(Color.WHITE);
+        listview.setBackgroundColor(Color.parseColor("#d3d3d3"));
     }
 
     public void initKeyboardContainer() {
@@ -190,7 +190,7 @@ public class MainActivity extends Activity {
                                                         keyboardContainer.setBackgroundColor(Color.WHITE);
                                                     }
                                                 } else {
-                                                    childView.setBackgroundColor(Color.RED);
+                                                    childView.setBackgroundColor(Color.parseColor("#f08080"));
                                                 }
                                                 break;
                                             }
@@ -211,19 +211,29 @@ public class MainActivity extends Activity {
                                     inputString += params[0];
                                     tv.setText(inputString);
                                     setResultAtListView(inputString);
-                                    if (keyboardMode == 2) {
+                                    if (keyboardMode == 1) {
+                                        if (sourceList.size() <= 10) {
+                                            if (sourceList.size() != 0) {
+                                                tv.setVisibility(View.GONE);
+                                                tapBoardView.setVisibility(View.GONE);
+                                                keyboardContainer.setBackgroundColor(Color.parseColor("#00000000"));
+                                            } else {
+                                                showNoItemsMessage();
+                                            }
+                                        }
+                                    } else if (keyboardMode == 2) {
                                         if (inputString.length() > 2) {
                                             if (sourceList.size() != 0) {
                                                 tv.setVisibility(View.GONE);
                                                 tapBoardView.setVisibility(View.GONE);
                                                 keyboardContainer.setBackgroundColor(Color.parseColor("#00000000"));
                                             } else {
-                                                if (toast != null) {
-                                                    toast.cancel();
-                                                }
-                                                toast = Toast.makeText(getApplicationContext(), "There are no itmes", Toast.LENGTH_SHORT);
-                                                toast.show();
+                                                showNoItemsMessage();
                                             }
+                                        }
+                                    } else {
+                                        if (sourceList.size() == 0) {
+                                            showNoItemsMessage();
                                         }
                                     }
                                 }
@@ -234,6 +244,14 @@ public class MainActivity extends Activity {
                 return true;
             }
         });
+    }
+
+    public void showNoItemsMessage() {
+        if (toast != null) {
+            toast.cancel();
+        }
+        toast = Toast.makeText(getApplicationContext(), "There are no itmes", Toast.LENGTH_SHORT);
+        toast.show();
     }
 
     public void initStartView() {
@@ -284,22 +302,6 @@ public class MainActivity extends Activity {
         }
         adapter.notifyDataSetChanged();
         listview.setSelectionAfterHeaderView();
-
-        if (keyboardMode == 1) {
-            if (sourceList.size() <= 10) {
-                if (sourceList.size() != 0) {
-                    tv.setVisibility(View.GONE);
-                    tapBoardView.setVisibility(View.GONE);
-                    keyboardContainer.setBackgroundColor(Color.parseColor("#00000000"));
-                } else {
-                    if (toast != null) {
-                        toast.cancel();
-                    }
-                    toast = Toast.makeText(getApplicationContext(), "There are no itmes", Toast.LENGTH_SHORT);
-                    toast.show();
-                }
-            }
-        }
     }
 
     public String[] getInputInfo(MotionEvent event) {
