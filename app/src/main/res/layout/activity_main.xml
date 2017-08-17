@@ -88,6 +88,10 @@
             android:id="@+id/list_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:scrollbarThumbVertical="@drawable/scrollbar_vertical_thumb"
+            android:scrollbarTrackVertical="@drawable/scrollbar_vertical_track"
+            android:scrollbarSize="5dp"
+            android:fadeScrollbars="false"
             >
         </ListView>
     </RelativeLayout>
