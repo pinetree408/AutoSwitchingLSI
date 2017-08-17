@@ -3,6 +3,7 @@ package com.pinetree408.research.watchtapboard;
 import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -159,7 +160,9 @@ public class MainActivity extends Activity {
                                 switch (id){
                                     case 0:
                                         //left
-                                        inputString = "";
+                                        if (inputString.length() != 0) {
+                                            inputString = inputString.substring(0, inputString.length() - 1);
+                                        }
                                         inputView.setText(inputString);
                                         setResultAtListView(inputString);
                                         if (keyboardMode != 0) {
@@ -206,7 +209,7 @@ public class MainActivity extends Activity {
                             }
                         } else {
                             if (tapBoardView.getVisibility() == View.VISIBLE) {
-                                if (touchTime < 100) {
+                                if (touchTime < 200) {
                                     String[] params = getInputInfo(event);
                                     if (params[0].equals(".")) {
                                         break;
@@ -274,11 +277,15 @@ public class MainActivity extends Activity {
                                     public void run() {
                                         if (childView.getText().equals("TapBoard")) {
                                             keyboardMode = 0;
+                                            inputView.setGravity(Gravity.LEFT|Gravity.CENTER);
                                         } else if (childView.getText().equals("ListBased")) {
                                             keyboardMode = 1;
+                                            inputView.setGravity(Gravity.CENTER);
                                         } else {
                                             keyboardMode = 2;
+                                            inputView.setGravity(Gravity.CENTER);
                                         }
+                                        inputView.setTextAlignment(View.TEXT_ALIGNMENT_GRAVITY);
                                         initKeyboardContainer();
                                         startView.setVisibility(View.VISIBLE);
                                         taskSelectorView.setVisibility(View.GONE);
@@ -319,25 +326,16 @@ public class MainActivity extends Activity {
     }
 
     public void setResultAtListView(String inputString) {
+        sourceList.clear();
         if (inputString.equals("")) {
-            sourceList.clear();
-            for (int i = 0; i < Source.set1.length; i++) {
-                sourceList.add(Source.set1[i]);
-            }
-            for (int i = 0; i < Source.set2.length; i++) {
-                sourceList.add(Source.set2[i]);
-            }
-            for (int i = 0; i < Source.set3.length; i++) {
-                sourceList.add(Source.set3[i]);
-            }
+            sourceList.addAll(originSourceList);
         } else {
             ArrayList<String> tempList = new ArrayList<String>();
-            for (String item : sourceList) {
+            for (String item : originSourceList) {
                 if (item.startsWith(inputString)) {
                     tempList.add(item);
                 }
             }
-            sourceList.clear();
             sourceList.addAll(tempList);
         }
         adapter.notifyDataSetChanged();
