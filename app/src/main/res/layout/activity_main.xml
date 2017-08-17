@@ -8,6 +8,45 @@
     tools:deviceIds="wear"
     >
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/task_selector"
+        android:orientation="vertical"
+        >
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:id="@+id/task_tapboard"
+            android:text="TapBoard"
+            android:textAlignment="center"
+            android:gravity="center"
+            android:textSize="20dp"
+            />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:id="@+id/task_listbased"
+            android:text="ListBased"
+            android:textAlignment="center"
+            android:gravity="center"
+            android:textSize="20dp"
+            />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:id="@+id/task_inputbased"
+            android:text="InputBased"
+            android:textAlignment="center"
+            android:gravity="center"
+            android:textSize="20dp"
+            />
+    </LinearLayout>
+
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="match_parent"

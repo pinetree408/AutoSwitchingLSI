@@ -45,7 +45,7 @@ public class MainActivity extends Activity {
     // 0 : tapboard
     // 1 : result based
     // 2 : input based
-    int keyboardMode = 0;
+    int keyboardMode;
     Toast toast;
     TextView startView;
     View taskView;
@@ -67,11 +67,9 @@ public class MainActivity extends Activity {
         taskView = findViewById(R.id.task);
 
         initListView();
-        initKeyboardContainer();
         initStartView();
 
-        startView.setVisibility(View.VISIBLE);
-        taskView.setVisibility(View.GONE);
+        initTaskSelectorView();
     }
 
     public void initSourceList() {
@@ -252,6 +250,42 @@ public class MainActivity extends Activity {
         }
         toast = Toast.makeText(getApplicationContext(), "There are no itmes", Toast.LENGTH_SHORT);
         toast.show();
+    }
+
+    public void initTaskSelectorView() {
+        startView.setVisibility(View.GONE);
+        taskView.setVisibility(View.GONE);
+        final ViewGroup taskSelectorView = (ViewGroup) findViewById(R.id.task_selector);
+        for (int i = 0; i < taskSelectorView.getChildCount(); i++) {
+            final TextView childView = (TextView) taskSelectorView.getChildAt(i);
+            childView.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN:
+                            runOnUiThread(
+                                new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (childView.getText().equals("TapBoard")) {
+                                            keyboardMode = 0;
+                                        } else if (childView.getText().equals("ListBased")) {
+                                            keyboardMode = 1;
+                                        } else {
+                                            keyboardMode = 2;
+                                        }
+                                        initKeyboardContainer();
+                                        startView.setVisibility(View.VISIBLE);
+                                        taskSelectorView.setVisibility(View.GONE);
+                                    }
+                                }
+                            );
+                            break;
+                    }
+                    return true;
+                }
+            });
+        }
     }
 
     public void initStartView() {
