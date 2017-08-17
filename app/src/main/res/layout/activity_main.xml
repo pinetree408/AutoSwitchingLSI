@@ -72,11 +72,20 @@
             >
             <TextView
                 android:layout_width="match_parent"
-                android:layout_height="71dp"
-                android:id="@+id/place_holder"
-                android:textAlignment="center"
-                android:gravity="center"
-                android:textColor="@color/red"
+                android:layout_height="36dp"
+                android:id="@+id/target"
+                android:gravity="left|center"
+                android:textAlignment="gravity"
+                android:paddingLeft="6dp"
+                android:textStyle="bold"
+                />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="35dp"
+                android:id="@+id/input"
+                android:gravity="left|center"
+                android:textAlignment="gravity"
+                android:paddingLeft="6dp"
                 />
             <com.pinetree408.research.watchtapboard.TapBoardView
                 android:id="@+id/tapboard"
@@ -90,7 +99,7 @@
             android:layout_height="match_parent"
             android:scrollbarThumbVertical="@drawable/scrollbar_vertical_thumb"
             android:scrollbarTrackVertical="@drawable/scrollbar_vertical_track"
-            android:scrollbarSize="5dp"
+            android:scrollbarSize="6dp"
             android:fadeScrollbars="false"
             >
         </ListView>

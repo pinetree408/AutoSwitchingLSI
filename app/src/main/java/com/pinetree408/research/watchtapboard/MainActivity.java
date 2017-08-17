@@ -33,7 +33,8 @@ public class MainActivity extends Activity {
     ArrayAdapter<String> adapter;
     ListView listview;
 
-    TextView tv;
+    TextView targetView;
+    TextView inputView;
     TapBoardView tapBoardView;
 
     String inputString;
@@ -59,7 +60,10 @@ public class MainActivity extends Activity {
         initSourceList();
 
         listview = (ListView) findViewById(R.id.list_view);
-        tv = (TextView) findViewById(R.id.place_holder);
+        targetView = (TextView) findViewById(R.id.target);
+        targetView.setTextColor(Color.parseColor("#80000000"));
+        inputView = (TextView) findViewById(R.id.input);
+        inputView.setTextColor(Color.parseColor("#80000000"));
         tapBoardView = (TapBoardView) findViewById(R.id.tapboard);
         keyboardContainer = (View) findViewById(R.id.keyboard_container);
 
@@ -156,10 +160,10 @@ public class MainActivity extends Activity {
                                     case 0:
                                         //left
                                         inputString = "";
-                                        tv.setText(inputString);
+                                        inputView.setText(inputString);
                                         setResultAtListView(inputString);
                                         if (keyboardMode != 0) {
-                                            tv.setVisibility(View.VISIBLE);
+                                            inputView.setVisibility(View.VISIBLE);
                                             tapBoardView.setVisibility(View.VISIBLE);
                                             keyboardContainer.setBackgroundColor(Color.WHITE);
                                         }
@@ -176,14 +180,15 @@ public class MainActivity extends Activity {
                                             if (under && over) {
                                                 if (childView.getText().equals(target)) {
                                                     target = originSourceList.get(random.nextInt(originSourceList.size()));
+                                                    targetView.setText(target);
                                                     startView.setText(target);
                                                     startView.setVisibility(View.VISIBLE);
                                                     taskView.setVisibility(View.GONE);
                                                     inputString = "";
-                                                    tv.setText(inputString);
+                                                    inputView.setText(inputString);
                                                     setResultAtListView(inputString);
                                                     if (keyboardMode != 0) {
-                                                        tv.setVisibility(View.VISIBLE);
+                                                        inputView.setVisibility(View.VISIBLE);
                                                         tapBoardView.setVisibility(View.VISIBLE);
                                                         keyboardContainer.setBackgroundColor(Color.WHITE);
                                                     }
@@ -207,12 +212,12 @@ public class MainActivity extends Activity {
                                         break;
                                     }
                                     inputString += params[0];
-                                    tv.setText(inputString);
+                                    inputView.setText(inputString);
                                     setResultAtListView(inputString);
                                     if (keyboardMode == 1) {
                                         if (sourceList.size() <= 10) {
                                             if (sourceList.size() != 0) {
-                                                tv.setVisibility(View.GONE);
+                                                inputView.setVisibility(View.GONE);
                                                 tapBoardView.setVisibility(View.GONE);
                                                 keyboardContainer.setBackgroundColor(Color.parseColor("#00000000"));
                                             } else {
@@ -222,7 +227,7 @@ public class MainActivity extends Activity {
                                     } else if (keyboardMode == 2) {
                                         if (inputString.length() > 2) {
                                             if (sourceList.size() != 0) {
-                                                tv.setVisibility(View.GONE);
+                                                inputView.setVisibility(View.GONE);
                                                 tapBoardView.setVisibility(View.GONE);
                                                 keyboardContainer.setBackgroundColor(Color.parseColor("#00000000"));
                                             } else {
@@ -290,6 +295,7 @@ public class MainActivity extends Activity {
 
     public void initStartView() {
         target = originSourceList.get(random.nextInt(originSourceList.size()));
+        targetView.setText(target);
         startView.setText(target);
         startView.setOnTouchListener(new View.OnTouchListener() {
             @Override
