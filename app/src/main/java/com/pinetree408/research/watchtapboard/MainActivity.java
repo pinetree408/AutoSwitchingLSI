@@ -14,6 +14,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Random;
 
 public class MainActivity extends Activity {
@@ -81,15 +83,25 @@ public class MainActivity extends Activity {
         sourceList = new ArrayList<String>();
         originSourceList = new ArrayList<String>();
         for (int i = 0; i < Source.set1.length; i++) {
-            sourceList.add(Source.set1[i]);
+            originSourceList.add(Source.set1[i]);
         }
         for (int i = 0; i < Source.set2.length; i++) {
-            sourceList.add(Source.set2[i]);
+            if (!originSourceList.contains(Source.set2[i])) {
+                originSourceList.add(Source.set2[i]);
+            }
         }
         for (int i = 0; i < Source.set3.length; i++) {
-            sourceList.add(Source.set3[i]);
+            if (!originSourceList.contains(Source.set3[i])) {
+                originSourceList.add(Source.set3[i]);
+            }
         }
-        originSourceList.addAll(sourceList);
+        for (int i = 0; i < Source.set4.length; i++) {
+            if (!originSourceList.contains(Source.set4[i])) {
+                originSourceList.add(Source.set4[i]);
+            }
+        }
+        Collections.sort(originSourceList);
+        sourceList.addAll(originSourceList);
     }
 
     public void initListView() {

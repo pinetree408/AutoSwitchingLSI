@@ -99,7 +99,7 @@ public class TapBoardView extends View {
         //double keyHeight = viewHeight / 4;
         double keyHeight = keyWidth * 1.5;
 
-        keyboardPaint.setTextSize((float) (keyHeight * 0.9));
+        keyboardPaint.setTextSize((float) (keyHeight * 0.8));
         keyboardPaint.setColor(Color.parseColor("#80000000"));
 
         if (keyWidthRef == -1.0) {
