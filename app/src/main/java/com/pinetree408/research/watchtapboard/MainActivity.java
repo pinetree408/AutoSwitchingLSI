@@ -1,24 +1,31 @@
 package com.pinetree408.research.watchtapboard;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.textservice.SentenceSuggestionsInfo;
+import android.view.textservice.SpellCheckerSession;
+import android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener;
+import android.view.textservice.SuggestionsInfo;
+import android.view.textservice.TextInfo;
+import android.view.textservice.TextServicesManager;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Random;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements SpellCheckerSessionListener {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     // Gesture Variable
@@ -54,6 +61,8 @@ public class MainActivity extends Activity {
     TextView startView;
     View taskView;
 
+    SpellCheckerSession mScs;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,6 +86,10 @@ public class MainActivity extends Activity {
         initStartView();
 
         initTaskSelectorView();
+
+        final TextServicesManager tsm = (TextServicesManager) getSystemService(
+                Context.TEXT_SERVICES_MANAGER_SERVICE);
+        mScs = tsm.newSpellCheckerSession(null, null, this, true);
     }
 
     public void initSourceList() {
@@ -228,6 +241,9 @@ public class MainActivity extends Activity {
                                     }
                                     inputString += params[0];
                                     inputView.setText(inputString);
+
+                                    mScs.getSentenceSuggestions(new TextInfo[] {new TextInfo(inputString)}, 18);
+
                                     setResultAtListView(inputString);
                                     if (keyboardMode == 1) {
                                         if (sourceList.size() <= 10) {
@@ -366,5 +382,34 @@ public class MainActivity extends Activity {
                 String.valueOf(tempY)
         };
         return params;
+    }
+
+    private boolean isSentenceSpellCheckSupported() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN;
+    }
+
+    @Override
+    public void onGetSuggestions(final SuggestionsInfo[] arg0) {
+        Log.d(TAG, "onGetSuggestions");
+    }
+
+    @Override
+    public void onGetSentenceSuggestions(final SentenceSuggestionsInfo[] arg0) {
+        if (!isSentenceSpellCheckSupported()) {
+            return;
+        }
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < arg0.length; ++i) {
+            final SentenceSuggestionsInfo ssi = arg0[i];
+            for (int j = 0; j < ssi.getSuggestionsCount(); ++j) {
+                for (int k = 0; k < ssi.getSuggestionsInfoAt(j).getSuggestionsCount(); k++) {
+                    if (j != 0) {
+                        sb.append(", ");
+                    }
+                    sb.append(ssi.getSuggestionsInfoAt(j).getSuggestionAt(k));
+                }
+            }
+        }
+        Log.d(TAG, sb.toString());
     }
 }
