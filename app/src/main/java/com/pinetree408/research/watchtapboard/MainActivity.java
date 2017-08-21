@@ -3,8 +3,8 @@ package com.pinetree408.research.watchtapboard;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -22,6 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Random;
 
@@ -77,7 +78,7 @@ public class MainActivity extends Activity implements SpellCheckerSessionListene
         inputView = (TextView) findViewById(R.id.input);
         inputView.setTextColor(Color.parseColor("#80000000"));
         tapBoardView = (TapBoardView) findViewById(R.id.tapboard);
-        keyboardContainer = (View) findViewById(R.id.keyboard_container);
+        keyboardContainer = findViewById(R.id.keyboard_container);
 
         startView = (TextView) findViewById(R.id.start);
         taskView = findViewById(R.id.task);
@@ -93,11 +94,8 @@ public class MainActivity extends Activity implements SpellCheckerSessionListene
     }
 
     public void initSourceList() {
-        sourceList = new ArrayList<String>();
-        originSourceList = new ArrayList<String>();
-        for (int i = 0; i < Source.set1.length; i++) {
-            originSourceList.add(Source.set1[i]);
-        }
+        sourceList = new ArrayList<>();
+        originSourceList = new ArrayList<>(Arrays.asList(Source.set1));
         for (int i = 0; i < Source.set2.length; i++) {
             if (!originSourceList.contains(Source.set2[i])) {
                 originSourceList.add(Source.set2[i]);
@@ -119,8 +117,9 @@ public class MainActivity extends Activity implements SpellCheckerSessionListene
 
     public void initListView() {
         adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, sourceList){
+            @NonNull
             @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
+            public View getView(int position, View convertView, @NonNull ViewGroup parent) {
                 View view = super.getView(position, convertView, parent);
                 TextView tv = (TextView) view.findViewById(android.R.id.text1);
                 tv.setTextColor(Color.BLACK);
@@ -143,7 +142,6 @@ public class MainActivity extends Activity implements SpellCheckerSessionListene
         keyboardContainer.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                // TODO Auto-generated method stub
                 int tempX = (int) event.getAxisValue(MotionEvent.AXIS_X);
                 int tempY = (int) event.getAxisValue(MotionEvent.AXIS_Y);
                 long eventTime = System.currentTimeMillis();
@@ -305,7 +303,7 @@ public class MainActivity extends Activity implements SpellCheckerSessionListene
                                     public void run() {
                                         if (childView.getText().equals("TapBoard")) {
                                             keyboardMode = 0;
-                                            inputView.setGravity(Gravity.LEFT|Gravity.CENTER);
+                                            inputView.setGravity(Gravity.START|Gravity.CENTER);
                                         } else if (childView.getText().equals("ListBased")) {
                                             keyboardMode = 1;
                                             inputView.setGravity(Gravity.CENTER);
@@ -358,7 +356,7 @@ public class MainActivity extends Activity implements SpellCheckerSessionListene
         if (inputString.equals("")) {
             sourceList.addAll(originSourceList);
         } else {
-            ArrayList<String> tempList = new ArrayList<String>();
+            ArrayList<String> tempList = new ArrayList<>();
             for (String item : originSourceList) {
                 if (item.startsWith(inputString)) {
                     tempList.add(item);
@@ -384,10 +382,6 @@ public class MainActivity extends Activity implements SpellCheckerSessionListene
         return params;
     }
 
-    private boolean isSentenceSpellCheckSupported() {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN;
-    }
-
     @Override
     public void onGetSuggestions(final SuggestionsInfo[] arg0) {
         Log.d(TAG, "onGetSuggestions");
@@ -395,12 +389,8 @@ public class MainActivity extends Activity implements SpellCheckerSessionListene
 
     @Override
     public void onGetSentenceSuggestions(final SentenceSuggestionsInfo[] arg0) {
-        if (!isSentenceSpellCheckSupported()) {
-            return;
-        }
         final StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < arg0.length; ++i) {
-            final SentenceSuggestionsInfo ssi = arg0[i];
+        for (SentenceSuggestionsInfo ssi : arg0) {
             for (int j = 0; j < ssi.getSuggestionsCount(); ++j) {
                 for (int k = 0; k < ssi.getSuggestionsInfoAt(j).getSuggestionsCount(); k++) {
                     if (j != 0) {
