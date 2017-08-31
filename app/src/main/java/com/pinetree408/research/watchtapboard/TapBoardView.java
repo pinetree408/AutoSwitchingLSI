@@ -83,7 +83,7 @@ public class TapBoardView extends View {
         keyboardPaint.setAntiAlias(true);
         keyboardPaint.setTextAlign(Paint.Align.CENTER);
 
-        keyboardCharPos = new ArrayList<String>();
+        keyboardCharPos = new ArrayList<>();
         keyHeightRef = -1.0;
         keyWidthRef = -1.0;
     }

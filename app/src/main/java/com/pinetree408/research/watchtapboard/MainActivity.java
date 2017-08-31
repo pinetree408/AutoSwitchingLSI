@@ -374,12 +374,11 @@ public class MainActivity extends Activity implements SpellCheckerSessionListene
 
         String input = tapBoardView.getKey(tempX, tempY - tapBoardView.getY());
 
-        String[] params = {
+        return new String[] {
                 String.valueOf(input),
                 String.valueOf(tempX),
                 String.valueOf(tempY)
         };
-        return params;
     }
 
     @Override
