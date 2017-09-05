@@ -18,8 +18,8 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:id="@+id/task_tapboard"
-            android:text="TapBoard"
+            android:id="@+id/task_swipeandtap"
+            android:text="SwipeAndTap"
             android:textAlignment="center"
             android:gravity="center"
             android:textSize="20dp"
@@ -28,18 +28,8 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:id="@+id/task_listbased"
-            android:text="ListBased"
-            android:textAlignment="center"
-            android:gravity="center"
-            android:textSize="20dp"
-            />
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:id="@+id/task_inputbased"
-            android:text="InputBased"
+            android:id="@+id/task_tsi"
+            android:text="TSI"
             android:textAlignment="center"
             android:gravity="center"
             android:textSize="20dp"
@@ -72,18 +62,11 @@
             >
             <TextView
                 android:layout_width="match_parent"
-                android:layout_height="36dp"
-                android:id="@+id/target"
-                android:gravity="left|center"
-                android:textAlignment="gravity"
-                android:paddingLeft="6dp"
-                android:textStyle="bold"
-                />
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="35dp"
-                android:id="@+id/input"
-                android:paddingLeft="6dp"
+                android:layout_height="71dp"
+                android:id="@+id/place_holder"
+                android:textColor="@color/red"
+                android:textAlignment="center"
+                android:gravity="center"
                 />
             <com.pinetree408.research.watchtapboard.TapBoardView
                 android:id="@+id/tapboard"
