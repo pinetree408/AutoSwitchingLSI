@@ -10,6 +10,7 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -75,10 +76,10 @@ public class MainActivity extends Activity  {
         startView = (TextView) findViewById(R.id.start);
         taskView = findViewById(R.id.task);
 
+        initTaskSelectorView();
+
         initListView();
         initStartView();
-
-        initTaskSelectorView();
     }
 
     public void initSourceList() {
@@ -122,27 +123,38 @@ public class MainActivity extends Activity  {
         };
         listview.setAdapter(adapter);
         listview.setBackgroundColor(Color.parseColor("#d3d3d3"));
-    }
-
-    public void initKeyboardContainer() {
-        inputString = "";
-        keyboardContainer.bringToFront();
-        switch (keyboardMode) {
-            case 0:
-                break;
-            case 1:
-            case 2:
-                keyboardContainer.setBackgroundColor(Color.WHITE);
-                break;
-            case 3:
-                keyboardContainer.setVisibility(View.GONE);
-                tapBoardView.setVisibility(View.GONE);
-                break;
-            case 4:
-                tapBoardView.setBackgroundColor(Color.WHITE);
-                break;
-        }
-        keyboardContainer.setOnTouchListener(new View.OnTouchListener() {
+        listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                TextView selectedView = (TextView) view;
+                String selected = selectedView.getText().toString();
+                if (selected.equals(target)) {
+                    target = originSourceList.get(random.nextInt(originSourceList.size()));
+                    startView.setText(target);
+                    startView.setVisibility(View.VISIBLE);
+                    taskView.setVisibility(View.GONE);
+                    inputString = "";
+                    setResultAtListView(inputString);
+                    switch (keyboardMode) {
+                        case 0:
+                            break;
+                        case 1:
+                        case 2:
+                            tapBoardView.setVisibility(View.VISIBLE);
+                            keyboardContainer.setBackgroundColor(Color.WHITE);
+                            break;
+                        case 3:
+                            break;
+                        case 4:
+                            tapBoardView.setVisibility(View.VISIBLE);
+                            break;
+                    }
+                } else {
+                    selectedView.setBackgroundColor(Color.parseColor("#f08080"));
+                }
+            }
+        });
+        listview.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 int tempX = (int) event.getAxisValue(MotionEvent.AXIS_X);
@@ -154,14 +166,8 @@ public class MainActivity extends Activity  {
                         touchDownTime = eventTime;
                         touchDownX = tempX;
                         touchDownY = tempY;
-                        scrollY = tempY;
                         break;
                     case MotionEvent.ACTION_MOVE:
-                        final int moveLength = (int) scrollY - tempY;
-                        long scrollTime = eventTime - touchDownTime;
-                        Log.d(TAG, Long.toString(scrollTime));
-                        listview.smoothScrollBy(moveLength, 0);
-                        scrollY = tempY;
                         break;
                     case MotionEvent.ACTION_UP:
                         long touchTime = eventTime - touchDownTime;
@@ -188,9 +194,86 @@ public class MainActivity extends Activity  {
                                 switch (id){
                                     case 0:
                                         // left
-                                        if (keyboardMode == 3) {
-                                            break;
+                                        if (keyboardMode != 3) {
+                                            keyboardContainer.setVisibility(View.VISIBLE);
                                         }
+                                        break;
+                                    case 1:
+                                        // top;
+                                        break;
+                                    case 2:
+                                        // right
+                                        break;
+                                    case 3:
+                                        // bottom;
+                                        break;
+                                }
+                            }
+                        }
+                        break;
+                }
+                return false;
+            }
+        });
+    }
+
+    public void initKeyboardContainer() {
+        inputString = "";
+        keyboardContainer.bringToFront();
+        switch (keyboardMode) {
+            case 0:
+                break;
+            case 1:
+            case 2:
+                keyboardContainer.setBackgroundColor(Color.WHITE);
+                break;
+            case 3:
+                keyboardContainer.setVisibility(View.GONE);
+                break;
+            case 4:
+                tapBoardView.setBackgroundColor(Color.WHITE);
+                break;
+        }
+        keyboardContainer.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                int tempX = (int) event.getAxisValue(MotionEvent.AXIS_X);
+                int tempY = (int) event.getAxisValue(MotionEvent.AXIS_Y);
+                long eventTime = System.currentTimeMillis();
+
+                switch(event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        touchDownTime = eventTime;
+                        touchDownX = tempX;
+                        touchDownY = tempY;
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        long touchTime = eventTime - touchDownTime;
+                        int xDir = (int) (touchDownX - tempX);
+                        int yDir = (int) (touchDownY - tempY);
+                        int len = (int) Math.sqrt(xDir * xDir + yDir * yDir);
+                        int speed;
+                        if (touchTime > 0) {
+                            speed = (int) (len * 1000 / touchTime);
+                        } else {
+                            speed = 0;
+                        }
+                        if (len > dragThreshold) {
+                            if (speed > 400) {
+                                double angle = Math.acos((double) xDir / len) * angleFactor;
+                                if (yDir < 0) {
+                                    angle = 360 - angle;
+                                }
+                                angle += 45;
+                                int id = (int) (angle / 90);
+                                if (id > 3) {
+                                    id = 0;
+                                }
+                                switch (id){
+                                    case 0:
+                                        // left
                                         if (inputString.length() != 0) {
                                             inputString = inputString.substring(0, inputString.length() - 1);
                                         }
@@ -219,38 +302,7 @@ public class MainActivity extends Activity  {
                                         break;
                                     case 2:
                                         // right
-                                        for (int i = 0; i < listview.getChildCount(); i++) {
-                                            TextView childView = (TextView) listview.getChildAt(i);
-                                            boolean under = touchDownY <= (childView.getY() + childView.getHeight());
-                                            boolean over = touchDownY >= childView.getY();
-                                            if (under && over) {
-                                                if (childView.getText().toString().equals(target)) {
-                                                    target = originSourceList.get(random.nextInt(originSourceList.size()));
-                                                    startView.setText(target);
-                                                    startView.setVisibility(View.VISIBLE);
-                                                    taskView.setVisibility(View.GONE);
-                                                    inputString = "";
-                                                    setResultAtListView(inputString);
-                                                    switch (keyboardMode) {
-                                                        case 0:
-                                                            break;
-                                                        case 1:
-                                                        case 2:
-                                                            tapBoardView.setVisibility(View.VISIBLE);
-                                                            keyboardContainer.setBackgroundColor(Color.WHITE);
-                                                            break;
-                                                        case 3:
-                                                            break;
-                                                        case 4:
-                                                            tapBoardView.setVisibility(View.VISIBLE);
-                                                            break;
-                                                    }
-                                                } else {
-                                                    childView.setBackgroundColor(Color.parseColor("#f08080"));
-                                                }
-                                                break;
-                                            }
-                                        }
+                                        keyboardContainer.setVisibility(View.GONE);
                                         break;
                                     case 3:
                                         // bottom;
@@ -258,16 +310,43 @@ public class MainActivity extends Activity  {
                                 }
                             }
                         } else {
-                            if (tapBoardView.getVisibility() == View.VISIBLE) {
-                                if (touchTime < 200) {
-                                    // tap
+                            if (touchTime < 200) {
+                                // tap
+                                if ((0 <= tempY) && (tempY < tapBoardView.getY())) {
+                                    for (int i = 0; i < listview.getChildCount(); i++) {
+                                        TextView childView = (TextView) listview.getChildAt(i);
+                                        boolean under = touchDownY <= (childView.getY() + childView.getHeight());
+                                        boolean over = touchDownY >= childView.getY();
+                                        if (under && over) {
+                                            if (childView.getText().toString().equals(target)) {
+                                                target = originSourceList.get(random.nextInt(originSourceList.size()));
+                                                startView.setText(target);
+                                                startView.setVisibility(View.VISIBLE);
+                                                taskView.setVisibility(View.GONE);
+                                                inputString = "";
+                                                setResultAtListView(inputString);
+                                                switch (keyboardMode) {
+                                                    case 0:
+                                                        break;
+                                                    case 1:
+                                                    case 2:
+                                                        tapBoardView.setVisibility(View.VISIBLE);
+                                                        keyboardContainer.setBackgroundColor(Color.WHITE);
+                                                        break;
+                                                    case 3:
+                                                        break;
+                                                    case 4:
+                                                        break;
+                                                }
+                                            } else {
+                                                childView.setBackgroundColor(Color.parseColor("#f08080"));
+                                            }
+                                            break;
+                                        }
+                                    }
+                                } else {
                                     String[] params = getInputInfo(event);
                                     if (params[0].equals(".")) {
-                                        if ((0 <= tempY) && (tempY < tapBoardView.getY())) {
-                                            if (keyboardMode == 4) {
-                                                tapBoardView.setVisibility(View.GONE);
-                                            }
-                                        }
                                         break;
                                     }
                                     inputString += params[0];
@@ -298,13 +377,6 @@ public class MainActivity extends Activity  {
                                         if (sourceList.size() == 0) {
                                             placehoderView.setText(inputString);
                                         }
-                                    }
-                                }
-                            } else {
-                                if (touchTime < 200) {
-                                    // tap
-                                    if (keyboardMode == 4) {
-                                        tapBoardView.setVisibility(View.VISIBLE);
                                     }
                                 }
                             }
