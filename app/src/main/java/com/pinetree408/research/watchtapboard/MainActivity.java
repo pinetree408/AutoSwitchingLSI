@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,6 +20,8 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -55,6 +58,7 @@ public class MainActivity extends Activity  {
     // 3 : Swipe & Tap
     // 4 : TSI
     int keyboardMode;
+    Map<String, Integer> mapIndex;
 
     Toast toast;
     TextView startView;
@@ -76,10 +80,10 @@ public class MainActivity extends Activity  {
         startView = (TextView) findViewById(R.id.start);
         taskView = findViewById(R.id.task);
 
-        initTaskSelectorView();
-
         initListView();
         initStartView();
+
+        initTaskSelectorView();
     }
 
     public void initSourceList() {
@@ -111,6 +115,8 @@ public class MainActivity extends Activity  {
             public View getView(int position, View convertView, @NonNull ViewGroup parent) {
                 View view = super.getView(position, convertView, parent);
                 TextView tv = (TextView) view.findViewById(android.R.id.text1);
+                tv.setHeight(44);
+                tv.setMinimumHeight(44);
                 tv.setTextColor(Color.BLACK);
                 tv.setBackgroundColor(Color.WHITE);
                 tv.setGravity(Gravity.CENTER);
@@ -146,7 +152,7 @@ public class MainActivity extends Activity  {
                         case 3:
                             break;
                         case 4:
-                            tapBoardView.setVisibility(View.VISIBLE);
+                            keyboardContainer.setVisibility(View.VISIBLE);
                             break;
                     }
                 } else {
@@ -196,6 +202,8 @@ public class MainActivity extends Activity  {
                                         // left
                                         if (keyboardMode != 3) {
                                             keyboardContainer.setVisibility(View.VISIBLE);
+                                        } else {
+                                            return true;
                                         }
                                         break;
                                     case 1:
@@ -203,7 +211,7 @@ public class MainActivity extends Activity  {
                                         break;
                                     case 2:
                                         // right
-                                        break;
+                                        return true;
                                     case 3:
                                         // bottom;
                                         break;
@@ -422,6 +430,13 @@ public class MainActivity extends Activity  {
                                         } else if (childView.getText().equals("TSI")) {
                                             keyboardMode = 4;
                                         }
+                                        if (keyboardMode == 3) {
+                                            getIndexList();
+                                            displayIndex();
+                                        } else {
+                                            View sideIndex = findViewById(R.id.side_index);
+                                            sideIndex.setVisibility(View.GONE);
+                                        }
                                         initKeyboardContainer();
                                         startView.setVisibility(View.VISIBLE);
                                         taskSelectorView.setVisibility(View.GONE);
@@ -488,5 +503,35 @@ public class MainActivity extends Activity  {
                 String.valueOf(tempX),
                 String.valueOf(tempY)
         };
+    }
+
+    private void getIndexList() {
+        mapIndex = new LinkedHashMap<String, Integer>();
+        for (int i = 0; i < originSourceList.size(); i++) {
+            String fruit = originSourceList.get(i);
+            String index = fruit.substring(0, 1);
+
+            if (mapIndex.get(index) == null)
+                mapIndex.put(index, i);
+        }
+    }
+
+    private void displayIndex() {
+        LinearLayout indexLayout = (LinearLayout) findViewById(R.id.side_index);
+
+        TextView textView;
+        List<String> indexList = new ArrayList<>(mapIndex.keySet());
+        for (String index : indexList) {
+            textView = (TextView) getLayoutInflater().inflate(
+                    R.layout.side_index_item, null);
+            textView.setText(index.toUpperCase());
+            textView.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View view) {
+                    TextView selectedIndex = (TextView) view;
+                    listview.setSelection(mapIndex.get(selectedIndex.getText().toString().toLowerCase()));
+                }
+            });
+            indexLayout.addView(textView);
+        }
     }
 }

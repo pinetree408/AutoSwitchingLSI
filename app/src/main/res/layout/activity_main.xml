@@ -84,6 +84,17 @@
             android:fadeScrollbars="false"
             >
         </ListView>
+        <LinearLayout
+            android:id="@+id/side_index"
+            android:layout_width="20dp"
+            android:layout_height="match_parent"
+            android:background="#c3c3c3"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="6dp"
+            >
+        </LinearLayout>
     </RelativeLayout>
 
 </android.support.wearable.view.BoxInsetLayout>
