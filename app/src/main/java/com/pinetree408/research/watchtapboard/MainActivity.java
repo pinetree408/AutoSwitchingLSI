@@ -3,6 +3,7 @@ package com.pinetree408.research.watchtapboard;
 import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.text.Html;
 import android.util.Log;
@@ -12,18 +13,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends Activity  {
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -34,7 +34,6 @@ public class MainActivity extends Activity  {
 
     private long touchDownTime;
     private float touchDownX, touchDownY;
-    private float scrollY;
 
     // View Variable
     ArrayList<String> originSourceList;
@@ -43,6 +42,7 @@ public class MainActivity extends Activity  {
     ArrayAdapter<String> adapter;
     ListView listview;
 
+    TextView inputView;
     TextView placehoderView;
     TapBoardView tapBoardView;
 
@@ -50,6 +50,7 @@ public class MainActivity extends Activity  {
     View keyboardContainer;
 
     // Task Variable
+    private Timer jobScheduler;
     Random random;
     String target;
     // 0 : tapboard
@@ -57,33 +58,42 @@ public class MainActivity extends Activity  {
     // 2 : input based
     // 3 : Swipe & Tap
     // 4 : TSI
+    // 5 : Input TSI
     int keyboardMode;
-    Map<String, Integer> mapIndex;
 
     Toast toast;
     TextView startView;
     View taskView;
+
+    // Exp Variable
+    int listSize;
+    int userNum;
+    int trial;
+    ViewGroup layoutSelectorView;
+    long startTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        jobScheduler = new Timer();
         random = new Random();
-        initSourceList();
+        listSize = 0;
+        userNum = 0;
+        trial = 0;
 
         listview = (ListView) findViewById(R.id.list_view);
         placehoderView = (TextView) findViewById(R.id.place_holder);
         tapBoardView = (TapBoardView) findViewById(R.id.tapboard);
         keyboardContainer = findViewById(R.id.keyboard_container);
 
+        layoutSelectorView = (ViewGroup) findViewById(R.id.layout_selector);
         startView = (TextView) findViewById(R.id.start);
         taskView = findViewById(R.id.task);
 
-        initListView();
-        initStartView();
-
-        initTaskSelectorView();
+        initLayoutSelectorView();
+        initTaskSelecotrView();
     }
 
     public void initSourceList() {
@@ -104,6 +114,7 @@ public class MainActivity extends Activity  {
                 originSourceList.add(Source.set4[i]);
             }
         }
+        originSourceList = new ArrayList(originSourceList.subList(0, listSize));
         Collections.sort(originSourceList);
         sourceList.addAll(originSourceList);
     }
@@ -122,8 +133,10 @@ public class MainActivity extends Activity  {
                 tv.setGravity(Gravity.CENTER);
                 tv.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
                 String initText = tv.getText().toString();
-                String text = "<font color=#00FF00>" + inputString + "</font>" + initText.replace(inputString, "");
-                tv.setText(Html.fromHtml(text));
+                if (keyboardMode == 4) {
+                    String text = "<font color=#00FF00>" + inputString + "</font>" + initText.replace(inputString, "");
+                    tv.setText(Html.fromHtml(text));
+                }
                 return view;
             }
         };
@@ -132,31 +145,26 @@ public class MainActivity extends Activity  {
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                long endTime = System.currentTimeMillis();
+                Log.d(TAG, trial + ":" + Long.toString(endTime - startTime));
                 TextView selectedView = (TextView) view;
                 String selected = selectedView.getText().toString();
                 if (selected.equals(target)) {
-                    target = originSourceList.get(random.nextInt(originSourceList.size()));
-                    startView.setText(target);
-                    startView.setVisibility(View.VISIBLE);
-                    taskView.setVisibility(View.GONE);
-                    inputString = "";
-                    setResultAtListView(inputString);
-                    switch (keyboardMode) {
-                        case 0:
-                            break;
-                        case 1:
-                        case 2:
-                            tapBoardView.setVisibility(View.VISIBLE);
-                            keyboardContainer.setBackgroundColor(Color.WHITE);
-                            break;
-                        case 3:
-                            break;
-                        case 4:
-                            keyboardContainer.setVisibility(View.VISIBLE);
-                            break;
-                    }
+                    selectedView.setBackgroundColor(Color.parseColor("#f0FF00"));
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            setNextTask();
+                        }
+                    }, 1000);
                 } else {
                     selectedView.setBackgroundColor(Color.parseColor("#f08080"));
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            setNextTask();
+                        }
+                    }, 1000);
                 }
             }
         });
@@ -223,6 +231,27 @@ public class MainActivity extends Activity  {
                 return false;
             }
         });
+        if (keyboardMode == 5) {
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.MATCH_PARENT,
+                    RelativeLayout.LayoutParams.MATCH_PARENT
+            );
+            params.setMargins(0, 44, 0, 0);
+            listview.setLayoutParams(params);
+
+            inputView = new TextView(this);
+            inputView.setHeight(44);
+            inputView.setMinimumHeight(44);
+            inputView.setWidth(320);
+            inputView.setMinimumWidth(320);
+            inputView.setTextColor(Color.parseColor("#00FF00"));
+            inputView.setBackgroundColor(Color.WHITE);
+            inputView.setGravity(Gravity.CENTER);
+            inputView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+
+            ViewGroup taskViewGroup = (ViewGroup) findViewById(R.id.task);
+            taskViewGroup.addView(inputView, 1);
+        }
     }
 
     public void initKeyboardContainer() {
@@ -239,6 +268,9 @@ public class MainActivity extends Activity  {
                 keyboardContainer.setVisibility(View.GONE);
                 break;
             case 4:
+                tapBoardView.setBackgroundColor(Color.WHITE);
+                break;
+            case 5:
                 tapBoardView.setBackgroundColor(Color.WHITE);
                 break;
         }
@@ -291,8 +323,7 @@ public class MainActivity extends Activity  {
                                                 break;
                                             case 1:
                                             case 2:
-                                                tapBoardView.setVisibility(View.VISIBLE);
-                                                keyboardContainer.setBackgroundColor(Color.WHITE);
+                                                placehoderView.setText(inputString);
                                                 break;
                                             case 3:
                                                 break;
@@ -302,6 +333,9 @@ public class MainActivity extends Activity  {
                                                 } else {
                                                     placehoderView.setText(inputString);
                                                 }
+                                                break;
+                                            case 5:
+                                                inputView.setText(inputString);
                                                 break;
                                         }
                                         break;
@@ -323,31 +357,33 @@ public class MainActivity extends Activity  {
                                 if ((0 <= tempY) && (tempY < tapBoardView.getY())) {
                                     for (int i = 0; i < listview.getChildCount(); i++) {
                                         TextView childView = (TextView) listview.getChildAt(i);
-                                        boolean under = touchDownY <= (childView.getY() + childView.getHeight());
-                                        boolean over = touchDownY >= childView.getY();
+                                        boolean under, over;
+                                        if (keyboardMode != 5) {
+                                            under = touchDownY <= (childView.getY() + childView.getHeight());
+                                            over = touchDownY >= childView.getY();
+                                        } else {
+                                            under = touchDownY <= (childView.getY() + childView.getHeight() + 44);
+                                            over = touchDownY >= childView.getY() + 44;
+                                        }
                                         if (under && over) {
+                                            long endTime = System.currentTimeMillis();
+                                            Log.d(TAG, trial + ":" + Long.toString(endTime - startTime));
                                             if (childView.getText().toString().equals(target)) {
-                                                target = originSourceList.get(random.nextInt(originSourceList.size()));
-                                                startView.setText(target);
-                                                startView.setVisibility(View.VISIBLE);
-                                                taskView.setVisibility(View.GONE);
-                                                inputString = "";
-                                                setResultAtListView(inputString);
-                                                switch (keyboardMode) {
-                                                    case 0:
-                                                        break;
-                                                    case 1:
-                                                    case 2:
-                                                        tapBoardView.setVisibility(View.VISIBLE);
-                                                        keyboardContainer.setBackgroundColor(Color.WHITE);
-                                                        break;
-                                                    case 3:
-                                                        break;
-                                                    case 4:
-                                                        break;
-                                                }
+                                                childView.setBackgroundColor(Color.parseColor("#f0FF00"));
+                                                new Handler().postDelayed(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        setNextTask();
+                                                    }
+                                                }, 1000);
                                             } else {
                                                 childView.setBackgroundColor(Color.parseColor("#f08080"));
+                                                new Handler().postDelayed(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        setNextTask();
+                                                    }
+                                                }, 1000);
                                             }
                                             break;
                                         }
@@ -364,19 +400,19 @@ public class MainActivity extends Activity  {
                                             showNoItemsMessage();
                                         }
                                     } else if (keyboardMode == 1) {
-                                        if (sourceList.size() <= 10) {
+                                        placehoderView.setText(inputString);
+                                        if (sourceList.size() <= 7) {
                                             if (sourceList.size() != 0) {
-                                                tapBoardView.setVisibility(View.GONE);
-                                                keyboardContainer.setBackgroundColor(Color.parseColor("#00000000"));
+                                                keyboardContainer.setVisibility(View.GONE);
                                             } else {
                                                 showNoItemsMessage();
                                             }
                                         }
                                     } else if (keyboardMode == 2) {
+                                        placehoderView.setText(inputString);
                                         if (inputString.length() > 2) {
                                             if (sourceList.size() != 0) {
-                                                tapBoardView.setVisibility(View.GONE);
-                                                keyboardContainer.setBackgroundColor(Color.parseColor("#00000000"));
+                                                keyboardContainer.setVisibility(View.GONE);
                                             } else {
                                                 showNoItemsMessage();
                                             }
@@ -385,6 +421,8 @@ public class MainActivity extends Activity  {
                                         if (sourceList.size() == 0) {
                                             placehoderView.setText(inputString);
                                         }
+                                    } else if (keyboardMode == 5) {
+                                        inputView.setText(inputString);
                                     }
                                 }
                             }
@@ -404,12 +442,97 @@ public class MainActivity extends Activity  {
         toast.show();
     }
 
-    public void initTaskSelectorView() {
+    public void initTaskSelecotrView() {
         startView.setVisibility(View.GONE);
         taskView.setVisibility(View.GONE);
+        layoutSelectorView.setVisibility(View.GONE);
         final ViewGroup taskSelectorView = (ViewGroup) findViewById(R.id.task_selector);
-        for (int i = 0; i < taskSelectorView.getChildCount(); i++) {
-            final TextView childView = (TextView) taskSelectorView.getChildAt(i);
+        final ViewGroup lengthSelecotrView = (ViewGroup) findViewById(R.id.length_selector);
+        for (int i = 0; i < lengthSelecotrView.getChildCount(); i++) {
+            final TextView childView = (TextView) lengthSelecotrView.getChildAt(i);
+            childView.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN:
+                            runOnUiThread(
+                                    new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            listSize = Integer.parseInt(childView.getText().toString());
+                                            for (int i = 0; i < lengthSelecotrView.getChildCount(); i++) {
+                                                TextView tempChildView = (TextView) lengthSelecotrView.getChildAt(i);
+                                                tempChildView.setBackgroundColor(Color.WHITE);
+                                            }
+                                            childView.setBackgroundColor(Color.parseColor("#f08080"));
+                                        }
+                                    }
+                            );
+                            break;
+                    }
+                    return true;
+                }
+            });
+        }
+
+        final ViewGroup userSelecotrView = (ViewGroup) findViewById(R.id.user_selector);
+        for (int i = 0; i < userSelecotrView.getChildCount(); i++) {
+            final TextView childView = (TextView) userSelecotrView.getChildAt(i);
+            childView.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    switch (event.getAction()) {
+                        case MotionEvent.ACTION_DOWN:
+                            runOnUiThread(
+                                    new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            if (childView.getText().equals("Up")) {
+                                                userNum = userNum + 1;
+                                            } else if (childView.getText().equals("Down")) {
+                                                userNum = userNum - 1;
+                                            }
+                                            TextView userNumView = (TextView) findViewById(R.id.user_number);
+                                            userNumView.setText(Integer.toString(userNum));
+                                        }
+                                    }
+                            );
+                            break;
+                    }
+                    return true;
+                }
+            });
+        }
+
+        View nextView = findViewById(R.id.next_button);
+        nextView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        if (listSize != 0 && userNum >= 0) {
+                            runOnUiThread(
+                                    new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            taskSelectorView.setVisibility(View.GONE);
+                                            layoutSelectorView.setVisibility(View.VISIBLE);
+                                            initSourceList();
+                                        }
+                                    }
+                            );
+                        }
+                        break;
+                }
+                return true;
+            }
+        });
+
+    }
+
+    public void initLayoutSelectorView() {
+        for (int i = 0; i < layoutSelectorView.getChildCount(); i++) {
+            final TextView childView = (TextView) layoutSelectorView.getChildAt(i);
             childView.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
@@ -429,17 +552,13 @@ public class MainActivity extends Activity  {
                                             keyboardMode = 3;
                                         } else if (childView.getText().equals("TSI")) {
                                             keyboardMode = 4;
+                                        } else if (childView.getText().equals("InputTSI")) {
+                                            keyboardMode = 5;
                                         }
-                                        if (keyboardMode == 3) {
-                                            getIndexList();
-                                            displayIndex();
-                                        } else {
-                                            View sideIndex = findViewById(R.id.side_index);
-                                            sideIndex.setVisibility(View.GONE);
-                                        }
+                                        initListView();
                                         initKeyboardContainer();
-                                        startView.setVisibility(View.VISIBLE);
-                                        taskSelectorView.setVisibility(View.GONE);
+                                        setNextTask();
+                                        layoutSelectorView.setVisibility(View.GONE);
                                     }
                                 }
                             );
@@ -449,30 +568,6 @@ public class MainActivity extends Activity  {
                 }
             });
         }
-    }
-
-    public void initStartView() {
-        target = originSourceList.get(random.nextInt(originSourceList.size()));
-        startView.setText(target);
-        startView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        runOnUiThread(
-                            new Runnable() {
-                                @Override
-                                public void run() {
-                                    startView.setVisibility(View.GONE);
-                                    taskView.setVisibility(View.VISIBLE);
-                                }
-                            }
-                        );
-                        break;
-                }
-                return true;
-            }
-        });
     }
 
     public void setResultAtListView(String inputString) {
@@ -505,33 +600,70 @@ public class MainActivity extends Activity  {
         };
     }
 
-    private void getIndexList() {
-        mapIndex = new LinkedHashMap<String, Integer>();
-        for (int i = 0; i < originSourceList.size(); i++) {
-            String fruit = originSourceList.get(i);
-            String index = fruit.substring(0, 1);
-
-            if (mapIndex.get(index) == null)
-                mapIndex.put(index, i);
+    public void setNextTask() {
+        target = originSourceList.get(random.nextInt(originSourceList.size()));
+        startView.setText(target);
+        startView.setVisibility(View.VISIBLE);
+        startView.setOnTouchListener(null);
+        taskView.setVisibility(View.GONE);
+        inputString = "";
+        if (keyboardMode == 5) {
+            inputView.setText(inputString);
         }
-    }
-
-    private void displayIndex() {
-        LinearLayout indexLayout = (LinearLayout) findViewById(R.id.side_index);
-
-        TextView textView;
-        List<String> indexList = new ArrayList<>(mapIndex.keySet());
-        for (String index : indexList) {
-            textView = (TextView) getLayoutInflater().inflate(
-                    R.layout.side_index_item, null);
-            textView.setText(index.toUpperCase());
-            textView.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View view) {
-                    TextView selectedIndex = (TextView) view;
-                    listview.setSelection(mapIndex.get(selectedIndex.getText().toString().toLowerCase()));
-                }
-            });
-            indexLayout.addView(textView);
+        placehoderView.setText(inputString);
+        setResultAtListView(inputString);
+        switch (keyboardMode) {
+            case 0:
+                break;
+            case 1:
+            case 2:
+                tapBoardView.setVisibility(View.VISIBLE);
+                keyboardContainer.setBackgroundColor(Color.WHITE);
+                break;
+            case 3:
+                break;
+            case 4:
+                break;
         }
+        jobScheduler.schedule(
+                new TimerTask() {
+                    @Override
+                    public void run() {
+                        runOnUiThread(
+                                new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        startView.setBackgroundColor(Color.parseColor("#f08080"));
+                                    }
+                                }
+                        );
+                        startView.setOnTouchListener(new View.OnTouchListener() {
+                            @Override
+                            public boolean onTouch(View v, MotionEvent event) {
+                                switch (event.getAction()) {
+                                    case MotionEvent.ACTION_DOWN:
+                                        runOnUiThread(
+                                                new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        startView.setBackgroundColor(Color.parseColor("#ffffff"));
+                                                        startView.setVisibility(View.GONE);
+                                                        taskView.setVisibility(View.VISIBLE);
+                                                        if (keyboardMode != 3) {
+                                                            keyboardContainer.setVisibility(View.VISIBLE);
+                                                        }
+                                                        trial = trial + 1;
+                                                        startTime = System.currentTimeMillis();
+                                                    }
+                                                }
+                                        );
+                                        break;
+                                }
+                                return true;
+                            }
+                        });
+                    }
+                },
+                2000);
     }
 }

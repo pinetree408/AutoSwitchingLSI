@@ -14,11 +14,137 @@
         android:id="@+id/task_selector"
         android:orientation="vertical"
         >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:id="@+id/length_selector"
+            >
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:textAlignment="center"
+                android:gravity="center"
+                android:text="20"
+                android:background="@color/white"
+                android:textColor="@color/black"
+                />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:textAlignment="center"
+                android:gravity="center"
+                android:text="40"
+                android:background="@color/white"
+                android:textColor="@color/black"
+                />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:textAlignment="center"
+                android:gravity="center"
+                android:text="80"
+                android:background="@color/white"
+                android:textColor="@color/black"
+                />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:textAlignment="center"
+                android:gravity="center"
+                android:text="160"
+                android:background="@color/white"
+                android:textColor="@color/black"
+                />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:textAlignment="center"
+                android:gravity="center"
+                android:text="320"
+                android:background="@color/white"
+                android:textColor="@color/black"
+                />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:textAlignment="center"
+                android:gravity="center"
+                android:text="640"
+                android:background="@color/white"
+                android:textColor="@color/black"
+                />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:id="@+id/user_selector"
+            >
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:textAlignment="center"
+                android:gravity="center"
+                android:text="Down"
+                android:background="@color/white"
+                android:textColor="@color/black"
+                />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:textAlignment="center"
+                android:gravity="center"
+                android:background="@color/white"
+                android:textColor="@color/black"
+                android:id="@+id/user_number"
+                android:text="0"
+                />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:textAlignment="center"
+                android:gravity="center"
+                android:text="Up"
+                android:background="@color/white"
+                android:textColor="@color/black"
+                />
+        </LinearLayout>
         <TextView
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:id="@+id/task_swipeandtap"
+            android:textAlignment="center"
+            android:gravity="center"
+            android:text="Next"
+            android:id="@+id/next_button"
+            android:background="@color/white"
+            android:textColor="@color/black"
+            />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/layout_selector"
+        android:orientation="vertical"
+        >
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:id="@+id/layout_swipeandtap"
             android:text="SwipeAndTap"
             android:textAlignment="center"
             android:gravity="center"
@@ -28,8 +154,38 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:id="@+id/task_tsi"
+            android:id="@+id/layout_tsi"
             android:text="TSI"
+            android:textAlignment="center"
+            android:gravity="center"
+            android:textSize="20dp"
+            />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:id="@+id/layout_inputsi"
+            android:text="InputTSI"
+            android:textAlignment="center"
+            android:gravity="center"
+            android:textSize="20dp"
+            />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:id="@+id/layout_listbased"
+            android:text="ListBased"
+            android:textAlignment="center"
+            android:gravity="center"
+            android:textSize="20dp"
+            />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:id="@+id/layout_inputbased"
+            android:text="InputBased"
             android:textAlignment="center"
             android:gravity="center"
             android:textSize="20dp"
@@ -84,17 +240,6 @@
             android:fadeScrollbars="false"
             >
         </ListView>
-        <LinearLayout
-            android:id="@+id/side_index"
-            android:layout_width="20dp"
-            android:layout_height="match_parent"
-            android:background="#c3c3c3"
-            android:gravity="center_horizontal"
-            android:orientation="vertical"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="6dp"
-            >
-        </LinearLayout>
     </RelativeLayout>
 
 </android.support.wearable.view.BoxInsetLayout>
