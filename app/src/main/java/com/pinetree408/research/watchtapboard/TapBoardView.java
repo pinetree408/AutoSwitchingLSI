@@ -110,31 +110,29 @@ public class TapBoardView extends View {
         }
 
         double keyboardPaddingLeft = (viewWidth - (10 * keyWidth)) * 0.5;
-        //double keyboardPaddingTop = 0;
-        double keyboardPaddingTop = (viewHeight - (3 * keyHeight)) * 0.4;
+        double keyboardPaddingTop = 10;
+        //double keyboardPaddingTop = (viewHeight - (3 * keyHeight)) * 0.4;
 
         for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 10; j++) {
-                if (j < keyboardChar[i].length) {
-                    String content = String.valueOf(keyboardChar[i][j]);
+            for (int j = 0; j < keyboardChar[i].length; j++) {
+                String content = String.valueOf(keyboardChar[i][j]);
 
-                    float leftPadding = (float) (keyboardPaddingLeft + j * keyWidth + (keyWidth * 0.5));
-                    float topPadding = (float) (keyboardPaddingTop + i * keyHeight + (keyHeight * 0.5));
-                    if (i == 1) {
-                        leftPadding += keyWidth * 0.5;
-                    } else if (i == 2) {
-                        leftPadding += keyWidth * 1.0;
-                    }
-
-                    if (keyboardCharPos.size() != 26) {
-                        keyboardCharPos.add(leftPadding + "-" + topPadding);
-                    }
-
-                    canvas.drawText(content,
-                            leftPadding,
-                            topPadding,
-                            keyboardPaint);
+                float leftPadding = (float) (keyboardPaddingLeft + j * keyWidth + (keyWidth * 0.5));
+                float topPadding = (float) (keyboardPaddingTop + i * keyHeight + (keyHeight * 0.5));
+                if (i == 1) {
+                    leftPadding += keyWidth * 0.5;
+                } else if (i == 2) {
+                    leftPadding += keyWidth * 1.0;
                 }
+
+                if (keyboardCharPos.size() != 26) {
+                    keyboardCharPos.add(leftPadding + "-" + topPadding);
+                }
+
+                canvas.drawText(content,
+                        leftPadding,
+                        topPadding,
+                        keyboardPaint);
             }
         }
 
