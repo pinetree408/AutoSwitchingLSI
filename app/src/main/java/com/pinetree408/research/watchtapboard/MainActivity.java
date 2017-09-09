@@ -101,7 +101,7 @@ public class MainActivity extends WearableActivity {
         listSize = 0;
         userNum = 0;
         trial = 0;
-        trialLimit = 9;
+        trialLimit = 7;
         //trialLimit = 2;
         err = 0;
         taskTrial = 0;
@@ -736,7 +736,7 @@ public class MainActivity extends WearableActivity {
                                         initListView();
                                         initKeyboardContainer();
 
-                                        targetList = predefineRandom(listSize, 10);
+                                        targetList = predefineRandom(listSize, trialLimit + 1);
                                         setNextTask();
                                         layoutSelectorView.setVisibility(View.GONE);
                                     }
@@ -950,7 +950,7 @@ public class MainActivity extends WearableActivity {
                     setTaskSetting(taskList, taskTrial);
                     break;
             }
-            targetList = predefineRandom(listSize, 10);
+            targetList = predefineRandom(listSize, trialLimit + 1);
             if (keyboardMode == 3) {
                 taskEndView.setText(listSize + "-" + sourceType + "-ST");
             } else {
@@ -978,7 +978,7 @@ public class MainActivity extends WearableActivity {
                     initKeyboardContainer();
                     setNextTask();
                 }
-            }, 25000);
+            }, 10000);
             return;
         }
         target = originSourceList.get(targetList[trial]);
