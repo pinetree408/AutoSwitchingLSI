@@ -25,7 +25,6 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -62,7 +61,7 @@ public class MainActivity extends WearableActivity {
     String target;
     int[] targetList;
     // 0 : tapboard
-    // 1 : result based
+    // 1 : list based
     // 2 : input based
     // 3 : Swipe & Tap
     // 4 : TSI
@@ -80,13 +79,13 @@ public class MainActivity extends WearableActivity {
     int trialLimit;
     int err;
     TextView errView;
+    TextView successView;
     TextView taskEndView;
-    ViewGroup layoutSelectorView;
     long startTime;
     String sourceType;
     int taskTrial;
     Logger logger;
-    String fileFormat = "block, trial, eventTime, target, inputKey";
+    String fileFormat = "block, trial, eventTime, target, inputKey, listSize, index";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,7 +101,6 @@ public class MainActivity extends WearableActivity {
         userNum = 0;
         trial = 0;
         trialLimit = 7;
-        //trialLimit = 2;
         err = 0;
         taskTrial = 0;
 
@@ -112,13 +110,12 @@ public class MainActivity extends WearableActivity {
         tapBoardView = (TapBoardView) findViewById(R.id.tapboard);
         keyboardContainer = findViewById(R.id.keyboard_container);
 
-        layoutSelectorView = (ViewGroup) findViewById(R.id.layout_selector);
         startView = (TextView) findViewById(R.id.start);
         taskView = findViewById(R.id.task);
         errView = (TextView) findViewById(R.id.err);
+        successView = (TextView) findViewById(R.id.success);
         taskEndView = (TextView) findViewById(R.id.task_end);
 
-        initLayoutSelectorView();
         initTaskSelecotrView();
     }
 
@@ -156,7 +153,6 @@ public class MainActivity extends WearableActivity {
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                long endTime = System.currentTimeMillis();
                 TextView selectedView = (TextView) view;
                 String selected = selectedView.getText().toString();
                 if (selected.equals(target)) {
@@ -165,12 +161,17 @@ public class MainActivity extends WearableActivity {
                             trial,
                             (System.currentTimeMillis() - startTime),
                             target,
-                            "item-success"
+                            "item-success",
+                            listview.getAdapter().getCount(),
+                            sourceList.indexOf(target)
                     );
                     selectedView.setBackgroundColor(Color.parseColor("#f0FF00"));
+                    successView.setVisibility(View.VISIBLE);
+                    successView.bringToFront();
                     new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
+                            successView.setVisibility(View.GONE);
                             setNextTask();
                         }
                     }, 1000);
@@ -180,12 +181,14 @@ public class MainActivity extends WearableActivity {
                             trial,
                             (System.currentTimeMillis() - startTime),
                             target,
-                            "item-err"
+                            "item-err",
+                            listview.getAdapter().getCount(),
+                            sourceList.indexOf(target)
                     );
                     startTime = System.currentTimeMillis();
                     listview.setSelectionAfterHeaderView();
                     err = err + 1;
-                    String styledText = target + "<br/><font color='red'>" + err + "/3</font>";
+                    String styledText = target + "<br/><font color='red'>" + err + "/5</font>";
                     errView.setText(Html.fromHtml(styledText));
                     taskView.setVisibility(View.GONE);
                     errView.setVisibility(View.VISIBLE);
@@ -194,7 +197,7 @@ public class MainActivity extends WearableActivity {
                         @Override
                         public void run() {
                             taskView.setVisibility(View.VISIBLE);
-                            if (keyboardMode == 4) {
+                            if (keyboardMode == 1 || keyboardMode == 2 || keyboardMode == 4) {
                                 keyboardContainer.setVisibility(View.VISIBLE);
                                 inputString = "";
                                 setResultAtListView(inputString);
@@ -206,7 +209,7 @@ public class MainActivity extends WearableActivity {
                                 }
                             }
                             errView.setVisibility(View.GONE);
-                            if (err > 2) {
+                            if (err > 4) {
                                 err = 0;
                                 setNextTask();
                             }
@@ -278,7 +281,7 @@ public class MainActivity extends WearableActivity {
                 return false;
             }
         });
-        if (keyboardMode == 4) {
+        if (keyboardMode == 1 || keyboardMode == 2 || keyboardMode == 4) {
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.MATCH_PARENT,
                     RelativeLayout.LayoutParams.MATCH_PARENT
@@ -305,7 +308,9 @@ public class MainActivity extends WearableActivity {
                                     trial,
                                     (System.currentTimeMillis() - startTime),
                                     target,
-                                    "to-keyboard"
+                                    "to-keyboard",
+                                    listview.getAdapter().getCount(),
+                                    sourceList.indexOf(target)
                             );
                             keyboardContainer.setVisibility(View.VISIBLE);
                             break;
@@ -325,13 +330,11 @@ public class MainActivity extends WearableActivity {
         switch (keyboardMode) {
             case 0:
                 break;
-            case 1:
-            case 2:
-                keyboardContainer.setBackgroundColor(Color.WHITE);
-                break;
             case 3:
                 keyboardContainer.setVisibility(View.GONE);
                 break;
+            case 1:
+            case 2:
             case 4:
                 tapBoardView.setBackgroundColor(Color.WHITE);
                 break;
@@ -398,7 +401,9 @@ public class MainActivity extends WearableActivity {
                                                 trial,
                                                 (System.currentTimeMillis() - startTime),
                                                 target,
-                                                "to-list"
+                                                "to-list",
+                                                listview.getAdapter().getCount(),
+                                                sourceList.indexOf(target)
                                         );
                                         keyboardContainer.setVisibility(View.GONE);
                                     }
@@ -410,11 +415,16 @@ public class MainActivity extends WearableActivity {
                                                 trial,
                                                 (System.currentTimeMillis() - startTime),
                                                 target,
-                                                "item-success"
+                                                "item-success",
+                                                listview.getAdapter().getCount(),
+                                                sourceList.indexOf(target)
                                         );
+                                        successView.setVisibility(View.VISIBLE);
+                                        successView.bringToFront();
                                         new Handler().postDelayed(new Runnable() {
                                             @Override
                                             public void run() {
+                                                successView.setVisibility(View.GONE);
                                                 setNextTask();
                                             }
                                         }, 1000);
@@ -425,10 +435,12 @@ public class MainActivity extends WearableActivity {
                                                 trial,
                                                 (System.currentTimeMillis() - startTime),
                                                 target,
-                                                "item-err"
+                                                "item-err",
+                                                listview.getAdapter().getCount(),
+                                                sourceList.indexOf(target)
                                         );
                                         startTime = System.currentTimeMillis();
-                                        String styledText = target + "<br/><font color='red'>" + err + "/3</font>";
+                                        String styledText = target + "<br/><font color='red'>" + err + "/5</font>";
                                         errView.setText(Html.fromHtml(styledText));
                                         taskView.setVisibility(View.GONE);
                                         errView.setVisibility(View.VISIBLE);
@@ -445,7 +457,7 @@ public class MainActivity extends WearableActivity {
                                                     placehoderView.setText("");
                                                 }
                                                 errView.setVisibility(View.GONE);
-                                                if (err > 2) {
+                                                if (err > 4) {
                                                     err = 0;
                                                     setNextTask();
                                                 }
@@ -454,89 +466,99 @@ public class MainActivity extends WearableActivity {
                                     }
                                     break;
                                 } else if (tapBoardView.getY() + tapBoardView.getHeight() < tempY) {
-                                    if (tempX < (tapBoardView.getX() + (tapBoardView.getWidth() / 2))) {
-                                        inputString = inputString + " ";
-                                        logger.fileWriteLog(
-                                                taskTrial,
-                                                trial,
-                                                (System.currentTimeMillis() - startTime),
-                                                target,
-                                                "space"
-                                        );
-                                    } else {
-                                        logger.fileWriteLog(
-                                                taskTrial,
-                                                trial,
-                                                (System.currentTimeMillis() - startTime),
-                                                target,
-                                                "delete"
-                                        );
-                                        if (inputString.length() != 0) {
-                                            inputString = inputString.substring(0, inputString.length() - 1);
-                                        }
-                                        setResultAtListView(inputString);
-                                        switch (keyboardMode) {
-                                            case 0:
-                                                break;
-                                            case 1:
-                                            case 2:
-                                                inputView.setText(inputString);
-                                                break;
-                                            case 3:
-                                                break;
-                                            case 4:
-                                                inputView.setText(inputString);
-                                                if (sourceList.size() != 0 && !inputString.equals("")) {
-                                                    placehoderView.setText(sourceList.get(0));
-                                                } else {
-                                                    placehoderView.setText("");
-                                                }
-                                                break;
-                                        }
-                                    }
-                                } else {
-                                    String[] params = getInputInfo(event);
                                     logger.fileWriteLog(
                                             taskTrial,
                                             trial,
                                             (System.currentTimeMillis() - startTime),
                                             target,
-                                            params[0]
+                                            "delete",
+                                            listview.getAdapter().getCount(),
+                                            sourceList.indexOf(target)
                                     );
+                                    if (inputString.length() != 0) {
+                                        inputString = inputString.substring(0, inputString.length() - 1);
+                                    }
+                                    setResultAtListView(inputString);
+                                    switch (keyboardMode) {
+                                        case 0:
+                                            break;
+                                        case 3:
+                                            break;
+                                        case 1:
+                                        case 2:
+                                        case 4:
+                                            inputView.setText(inputString);
+                                            if (sourceList.size() != 0 && !inputString.equals("")) {
+                                                placehoderView.setText(sourceList.get(0));
+                                            } else {
+                                                placehoderView.setText("");
+                                            }
+                                            break;
+                                    }
+                                } else {
+                                    String[] params = getInputInfo(event);
                                     if (params[0].equals(".")) {
+                                        logger.fileWriteLog(
+                                                taskTrial,
+                                                trial,
+                                                (System.currentTimeMillis() - startTime),
+                                                target,
+                                                params[0],
+                                                listview.getAdapter().getCount(),
+                                                sourceList.indexOf(target)
+                                        );
                                         break;
                                     }
                                     inputString += params[0];
                                     setResultAtListView(inputString);
-                                    if (keyboardMode == 0) {
-                                        if (sourceList.size() == 0) {
-                                            showNoItemsMessage();
-                                        }
-                                    } else if (keyboardMode == 1) {
-                                        inputView.setText(inputString);
-                                        if (sourceList.size() <= 7) {
+                                    logger.fileWriteLog(
+                                            taskTrial,
+                                            trial,
+                                            (System.currentTimeMillis() - startTime),
+                                            target,
+                                            params[0],
+                                            listview.getAdapter().getCount(),
+                                            sourceList.indexOf(target)
+                                    );
+                                    switch (keyboardMode) {
+                                        case 0:
+                                            inputView.setText(inputString);
                                             if (sourceList.size() != 0) {
-                                                keyboardContainer.setVisibility(View.GONE);
+                                                placehoderView.setText(sourceList.get(0));
                                             } else {
-                                                showNoItemsMessage();
+                                                placehoderView.setText("");
                                             }
-                                        }
-                                    } else if (keyboardMode == 2) {
-                                        inputView.setText(inputString);
-                                        if (inputString.length() > 2) {
+                                            break;
+                                        case 1:
+                                            inputView.setText(inputString);
                                             if (sourceList.size() != 0) {
-                                                keyboardContainer.setVisibility(View.GONE);
+                                                placehoderView.setText(sourceList.get(0));
                                             } else {
-                                                showNoItemsMessage();
+                                                placehoderView.setText("");
                                             }
-                                        }
-                                    } else if (keyboardMode == 4) {
-                                        inputView.setText(inputString);
-                                        if (sourceList.size() != 0) {
-                                            placehoderView.setText(sourceList.get(0));
-                                        } else {
-                                            placehoderView.setText("");
-                                        }
+                                            if (sourceList.size() <= 15) {
+                                                keyboardContainer.setVisibility(View.GONE);
+                                            }
+                                            break;
+                                        case 2:
+                                            inputView.setText(inputString);
+                                            if (sourceList.size() != 0) {
+                                                placehoderView.setText(sourceList.get(0));
+                                            } else {
+                                                placehoderView.setText("");
+                                            }
+                                            if (inputString.length() >= 2) {
+                                                keyboardContainer.setVisibility(View.GONE);
+                                            }
+                                            break;
+                                        case 4:
+                                            inputView.setText(inputString);
+                                            if (sourceList.size() != 0) {
+                                                placehoderView.setText(sourceList.get(0));
+                                            } else {
+                                                placehoderView.setText("");
+                                            }
+                                            break;
                                     }
                                 }
                             }
@@ -548,80 +570,12 @@ public class MainActivity extends WearableActivity {
         });
     }
 
-    public void showNoItemsMessage() {
-        if (toast != null) {
-            toast.cancel();
-        }
-        toast = Toast.makeText(getApplicationContext(), "There are no itmes", Toast.LENGTH_SHORT);
-        toast.show();
-    }
-
     public void initTaskSelecotrView() {
         errView.setVisibility(View.GONE);
         taskEndView.setVisibility(View.GONE);
         startView.setVisibility(View.GONE);
         taskView.setVisibility(View.GONE);
-        layoutSelectorView.setVisibility(View.GONE);
         final ViewGroup taskSelectorView = (ViewGroup) findViewById(R.id.task_selector);
-        final ViewGroup lengthSelecotrView = (ViewGroup) findViewById(R.id.length_selector);
-        for (int i = 0; i < lengthSelecotrView.getChildCount(); i++) {
-            final TextView childView = (TextView) lengthSelecotrView.getChildAt(i);
-            childView.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    switch (event.getAction()) {
-                        case MotionEvent.ACTION_DOWN:
-                            runOnUiThread(
-                                    new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            listSize = Integer.parseInt(childView.getText().toString());
-                                            for (int i = 0; i < lengthSelecotrView.getChildCount(); i++) {
-                                                TextView tempChildView = (TextView) lengthSelecotrView.getChildAt(i);
-                                                tempChildView.setBackgroundColor(Color.WHITE);
-                                            }
-                                            childView.setBackgroundColor(Color.parseColor("#f08080"));
-                                        }
-                                    }
-                            );
-                            break;
-                    }
-                    return true;
-                }
-            });
-        }
-
-        final ViewGroup sourceSelecotrView = (ViewGroup) findViewById(R.id.source_selector);
-        for (int i = 0; i < sourceSelecotrView.getChildCount(); i++) {
-            final TextView childView = (TextView) sourceSelecotrView.getChildAt(i);
-            childView.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    switch (event.getAction()) {
-                        case MotionEvent.ACTION_DOWN:
-                            runOnUiThread(
-                                    new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            if (childView.getText().equals("person")) {
-                                                sourceType = "person";
-                                            } else if (childView.getText().equals("app")) {
-                                                sourceType = "app";
-                                            }
-                                            for (int i = 0; i < sourceSelecotrView.getChildCount(); i++) {
-                                                TextView tempChildView = (TextView) sourceSelecotrView.getChildAt(i);
-                                                tempChildView.setBackgroundColor(Color.WHITE);
-                                            }
-                                            childView.setBackgroundColor(Color.parseColor("#f08080"));
-                                        }
-                                    }
-                            );
-                            break;
-                    }
-                    return true;
-                }
-            });
-        }
 
         final ViewGroup userSelecotrView = (ViewGroup) findViewById(R.id.user_selector);
         for (int i = 0; i < userSelecotrView.getChildCount(); i++) {
@@ -662,68 +616,11 @@ public class MainActivity extends WearableActivity {
                                 new Runnable() {
                                     @Override
                                     public void run() {
-                                        String[] taskList;
-                                        switch (userNum) {
-                                            case 0:
-                                                trialLimit = 2;
-                                                taskList = TaskList.p0;
-                                                setTaskSetting(taskList, taskTrial);
-                                                break;
-                                            case 1:
-                                                taskList = TaskList.p1;
-                                                setTaskSetting(taskList, taskTrial);
-                                                break;
-                                            case 2:
-                                                taskList = TaskList.p2;
-                                                setTaskSetting(taskList, taskTrial);
-                                                break;
-                                            case 3:
-                                                taskList = TaskList.p3;
-                                                setTaskSetting(taskList, taskTrial);
-                                                break;
-                                            case 4:
-                                                taskList = TaskList.p4;
-                                                setTaskSetting(taskList, taskTrial);
-                                                break;
-                                            case 5:
-                                                taskList = TaskList.p5;
-                                                setTaskSetting(taskList, taskTrial);
-                                                break;
-                                            case 6:
-                                                taskList = TaskList.p6;
-                                                setTaskSetting(taskList, taskTrial);
-                                                break;
-                                            case 7:
-                                                taskList = TaskList.p7;
-                                                setTaskSetting(taskList, taskTrial);
-                                                break;
-                                            case 8:
-                                                taskList = TaskList.p8;
-                                                setTaskSetting(taskList, taskTrial);
-                                                break;
-                                            case 9:
-                                                taskList = TaskList.p9;
-                                                setTaskSetting(taskList, taskTrial);
-                                                break;
-                                            case 10:
-                                                taskList = TaskList.p10;
-                                                setTaskSetting(taskList, taskTrial);
-                                                break;
-                                            case 11:
-                                                taskList = TaskList.p11;
-                                                setTaskSetting(taskList, taskTrial);
-                                                break;
-                                            case 12:
-                                                taskList = TaskList.p12;
-                                                setTaskSetting(taskList, taskTrial);
-                                                break;
-                                            case 13:
-                                                taskList = TaskList.p13;
-                                                setTaskSetting(taskList, taskTrial);
-                                                break;
+                                        if (userNum == 0) {
+                                            trialLimit = 2;
                                         }
+                                        setTaskList(userNum);
                                         taskSelectorView.setVisibility(View.GONE);
-                                        //layoutSelectorView.setVisibility(View.VISIBLE);
                                         initSourceList();
 
                                         String filePath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/";
@@ -738,7 +635,6 @@ public class MainActivity extends WearableActivity {
 
                                         targetList = predefineRandom(listSize, trialLimit + 1);
                                         setNextTask();
-                                        layoutSelectorView.setVisibility(View.GONE);
                                     }
                                 }
                         );
@@ -748,44 +644,6 @@ public class MainActivity extends WearableActivity {
             }
         });
 
-    }
-
-    public void initLayoutSelectorView() {
-        for (int i = 0; i < layoutSelectorView.getChildCount(); i++) {
-            final TextView childView = (TextView) layoutSelectorView.getChildAt(i);
-            childView.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    switch (event.getAction()) {
-                        case MotionEvent.ACTION_DOWN:
-                            runOnUiThread(
-                                    new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            if (childView.getText().equals("TapBoard")) {
-                                                keyboardMode = 0;
-                                            } else if (childView.getText().equals("ListBased")) {
-                                                keyboardMode = 1;
-                                            } else if (childView.getText().equals("InputBased")) {
-                                                keyboardMode = 2;
-                                            } else if (childView.getText().equals("ST")) {
-                                                keyboardMode = 3;
-                                            } else if (childView.getText().equals("TSI")) {
-                                                keyboardMode = 4;
-                                            }
-                                            initListView();
-                                            initKeyboardContainer();
-                                            setNextTask();
-                                            layoutSelectorView.setVisibility(View.GONE);
-                                        }
-                                    }
-                            );
-                            break;
-                    }
-                    return true;
-                }
-            });
-        }
     }
 
     public void setResultAtListView(String inputString) {
@@ -824,10 +682,124 @@ public class MainActivity extends WearableActivity {
 
         listSize = Integer.parseInt(data[1]);
         sourceType = data[0];
-        if (data[2].equals("ST")) {
+        if (data[2].equals("LTSI")) {
+            keyboardMode = 1;
+        } else if (data[2].equals("ITSI")) {
+            keyboardMode = 2;
+        } else if (data[2].equals("ST")) {
             keyboardMode = 3;
         } else if (data[2].equals("TSI")) {
             keyboardMode = 4;
+        }
+    }
+
+    public void setTaskList(int userNum) {
+        String[] taskList;
+        switch (userNum) {
+            case 0:
+                taskList = ExpTwoTaskList.p0;
+                if (taskTrial >= taskList.length) {
+                    MainActivity.this.finish();
+                    System.exit(0);
+                }
+                setTaskSetting(taskList, taskTrial);
+                break;
+            case 1:
+                taskList = ExpTwoTaskList.p1;
+                if (taskTrial >= taskList.length) {
+                    MainActivity.this.finish();
+                    System.exit(0);
+                }
+                setTaskSetting(taskList, taskTrial);
+                break;
+            case 2:
+                taskList = ExpTwoTaskList.p2;
+                if (taskTrial >= taskList.length) {
+                    MainActivity.this.finish();
+                    System.exit(0);
+                }
+                setTaskSetting(taskList, taskTrial);
+                break;
+            case 3:
+                taskList = ExpTwoTaskList.p3;
+                if (taskTrial >= taskList.length) {
+                    MainActivity.this.finish();
+                    System.exit(0);
+                }
+                setTaskSetting(taskList, taskTrial);
+                break;
+            case 4:
+                taskList = ExpTwoTaskList.p4;
+                if (taskTrial >= taskList.length) {
+                    MainActivity.this.finish();
+                    System.exit(0);
+                }
+                setTaskSetting(taskList, taskTrial);
+                break;
+            case 5:
+                taskList = ExpTwoTaskList.p5;
+                if (taskTrial >= taskList.length) {
+                    MainActivity.this.finish();
+                    System.exit(0);
+                }
+                setTaskSetting(taskList, taskTrial);
+                break;
+            case 6:
+                taskList = ExpTwoTaskList.p6;
+                if (taskTrial >= taskList.length) {
+                    MainActivity.this.finish();
+                    System.exit(0);
+                }
+                setTaskSetting(taskList, taskTrial);
+                break;
+            case 7:
+                taskList = ExpTwoTaskList.p7;
+                if (taskTrial >= taskList.length) {
+                    MainActivity.this.finish();
+                    System.exit(0);
+                }
+                setTaskSetting(taskList, taskTrial);
+                break;
+            case 8:
+                taskList = ExpTwoTaskList.p8;
+                if (taskTrial >= taskList.length) {
+                    MainActivity.this.finish();
+                    System.exit(0);
+                }
+                setTaskSetting(taskList, taskTrial);
+                break;
+            case 9:
+                taskList = ExpTwoTaskList.p9;
+                if (taskTrial >= taskList.length) {
+                    MainActivity.this.finish();
+                    System.exit(0);
+                }
+                setTaskSetting(taskList, taskTrial);
+                break;
+            case 10:
+                taskList = ExpTwoTaskList.p10;
+                if (taskTrial >= taskList.length) {
+                    MainActivity.this.finish();
+                    System.exit(0);
+                }
+                setTaskSetting(taskList, taskTrial);
+                break;
+            case 11:
+                taskList = ExpTwoTaskList.p11;
+                if (taskTrial >= taskList.length) {
+                    MainActivity.this.finish();
+                    System.exit(0);
+                }
+                setTaskSetting(taskList, taskTrial);
+                break;
+            case 12:
+                taskList = ExpTwoTaskList.p12;
+                if (taskTrial >= taskList.length) {
+                    MainActivity.this.finish();
+                    System.exit(0);
+                }
+                setTaskSetting(taskList, taskTrial);
+                break;
         }
     }
 
@@ -835,121 +807,7 @@ public class MainActivity extends WearableActivity {
         if (trial > trialLimit) {
             trial = 0;
             taskTrial = taskTrial + 1;
-            String[] taskList;
-            switch (userNum) {
-                case 0:
-                    taskList = TaskList.p0;
-                    if (taskTrial >= taskList.length - 1) {
-                        MainActivity.this.finish();
-                        System.exit(0);
-                    }
-                    setTaskSetting(taskList, taskTrial);
-                    break;
-                case 1:
-                    taskList = TaskList.p1;
-                    if (taskTrial >= taskList.length) {
-                        MainActivity.this.finish();
-                        System.exit(0);
-                    }
-                    setTaskSetting(taskList, taskTrial);
-                    break;
-                case 2:
-                    taskList = TaskList.p2;
-                    if (taskTrial >= taskList.length) {
-                        MainActivity.this.finish();
-                        System.exit(0);
-                    }
-                    setTaskSetting(taskList, taskTrial);
-                    break;
-                case 3:
-                    taskList = TaskList.p3;
-                    if (taskTrial >= taskList.length) {
-                        MainActivity.this.finish();
-                        System.exit(0);
-                    }
-                    setTaskSetting(taskList, taskTrial);
-                    break;
-                case 4:
-                    taskList = TaskList.p4;
-                    if (taskTrial >= taskList.length) {
-                        MainActivity.this.finish();
-                        System.exit(0);
-                    }
-                    setTaskSetting(taskList, taskTrial);
-                    break;
-                case 5:
-                    taskList = TaskList.p5;
-                    if (taskTrial >= taskList.length) {
-                        MainActivity.this.finish();
-                        System.exit(0);
-                    }
-                    setTaskSetting(taskList, taskTrial);
-                    break;
-                case 6:
-                    taskList = TaskList.p6;
-                    if (taskTrial >= taskList.length) {
-                        MainActivity.this.finish();
-                        System.exit(0);
-                    }
-                    setTaskSetting(taskList, taskTrial);
-                    break;
-                case 7:
-                    taskList = TaskList.p7;
-                    if (taskTrial >= taskList.length) {
-                        MainActivity.this.finish();
-                        System.exit(0);
-                    }
-                    setTaskSetting(taskList, taskTrial);
-                    break;
-                case 8:
-                    taskList = TaskList.p8;
-                    if (taskTrial >= taskList.length) {
-                        MainActivity.this.finish();
-                        System.exit(0);
-                    }
-                    setTaskSetting(taskList, taskTrial);
-                    break;
-                case 9:
-                    taskList = TaskList.p9;
-                    if (taskTrial >= taskList.length) {
-                        MainActivity.this.finish();
-                        System.exit(0);
-                    }
-                    setTaskSetting(taskList, taskTrial);
-                    break;
-                case 10:
-                    taskList = TaskList.p10;
-                    if (taskTrial >= taskList.length) {
-                        MainActivity.this.finish();
-                        System.exit(0);
-                    }
-                    setTaskSetting(taskList, taskTrial);
-                    break;
-                case 11:
-                    taskList = TaskList.p11;
-                    if (taskTrial >= taskList.length) {
-                        MainActivity.this.finish();
-                        System.exit(0);
-                    }
-                    setTaskSetting(taskList, taskTrial);
-                    break;
-                case 12:
-                    taskList = TaskList.p12;
-                    if (taskTrial >= taskList.length) {
-                        MainActivity.this.finish();
-                        System.exit(0);
-                    }
-                    setTaskSetting(taskList, taskTrial);
-                    break;
-                case 13:
-                    taskList = TaskList.p13;
-                    if (taskTrial >= taskList.length) {
-                        MainActivity.this.finish();
-                        System.exit(0);
-                    }
-                    setTaskSetting(taskList, taskTrial);
-                    break;
-            }
+            setTaskList(userNum);
             targetList = predefineRandom(listSize, trialLimit + 1);
             if (keyboardMode == 3) {
                 taskEndView.setText(listSize + "-" + sourceType + "-ST");
@@ -978,14 +836,18 @@ public class MainActivity extends WearableActivity {
                     initKeyboardContainer();
                     setNextTask();
                 }
-            }, 10000);
+            }, 5000);
             return;
         }
         target = originSourceList.get(targetList[trial]);
         if (taskTrial == 0 && trial == 0) {
-            if (keyboardMode == 3) {
+            if (keyboardMode == 1) {
+                startView.setText(listSize + "-" + sourceType + "-LTST" + "\n" + (trial + 1) + "/" + (trialLimit + 1) + "\n" + target);
+            } else if (keyboardMode == 2) {
+                startView.setText(listSize + "-" + sourceType + "-ITSI" + "\n" + (trial + 1) + "/" + (trialLimit + 1) + "\n" + target);
+            } else if (keyboardMode == 3) {
                 startView.setText(listSize + "-" + sourceType + "-ST" + "\n" + (trial + 1) + "/" + (trialLimit + 1) + "\n" + target);
-            } else {
+            } else if (keyboardMode == 4) {
                 startView.setText(listSize + "-" + sourceType + "-TSI" + "\n" + (trial + 1) + "/" + (trialLimit + 1) + "\n" + target);
             }
         } else {
@@ -1002,13 +864,10 @@ public class MainActivity extends WearableActivity {
         switch (keyboardMode) {
             case 0:
                 break;
-            case 1:
-            case 2:
-                tapBoardView.setVisibility(View.VISIBLE);
-                keyboardContainer.setBackgroundColor(Color.WHITE);
-                break;
             case 3:
                 break;
+            case 1:
+            case 2:
             case 4:
                 placehoderView.setBackgroundColor(Color.WHITE);
                 break;
@@ -1101,7 +960,7 @@ public class MainActivity extends WearableActivity {
         int currSize = 0;
         int retSum = 0;
         while (currSize < size - 1){
-            int temp = random.nextInt(n);
+            int temp = StdRandom.uniform(n);
             if (!intContains(ret, temp)){
                 ret[currSize++] = temp;
                 retSum += temp;
@@ -1110,7 +969,7 @@ public class MainActivity extends WearableActivity {
 
         int last = (int) (goalMean * size) - retSum;
 
-        if(last < 0 || last >= size){
+        if(last < 0 || last >= n){
             return predefineRandom(n, size);
         }
         else{

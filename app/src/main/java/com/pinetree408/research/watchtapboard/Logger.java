@@ -49,10 +49,10 @@ public class Logger {
     }
     public void fileWriteLog(
             int block, int trial, long eventTime,
-            String target, String inputKey) {
+            String target, String inputKey, int listSize, int index) {
 
         String log = block + "," + trial + "," + eventTime + "," +
-                target + "," + inputKey + "\n";
+                target + "," + inputKey + "," + listSize + "," + (index + 1) + "\n";
         fileWrite(log);
     }
 

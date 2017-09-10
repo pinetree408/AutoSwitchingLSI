@@ -4,7 +4,7 @@ package com.pinetree408.research.watchtapboard;
  * Created by leesangyoon on 2017. 9. 7..
  */
 
-public class TaskList {
+public class ExpOneTaskList {
     public static String[] p0 = {
             "person, 60, ST",
             "app, 15, ST",
