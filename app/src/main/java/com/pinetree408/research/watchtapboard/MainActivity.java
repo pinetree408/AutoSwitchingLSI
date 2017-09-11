@@ -86,6 +86,7 @@ public class MainActivity extends WearableActivity {
     int taskTrial;
     Logger logger;
     String fileFormat = "block, trial, eventTime, target, inputKey, listSize, index";
+    long autoToListTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -153,6 +154,9 @@ public class MainActivity extends WearableActivity {
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (System.currentTimeMillis() - autoToListTime < 500) {
+                    return;
+                }
                 TextView selectedView = (TextView) view;
                 String selected = selectedView.getText().toString();
                 if (selected.equals(target)) {
@@ -520,6 +524,7 @@ public class MainActivity extends WearableActivity {
                                             listview.getAdapter().getCount(),
                                             sourceList.indexOf(target)
                                     );
+                                    int convertSize = 0;
                                     switch (keyboardMode) {
                                         case 0:
                                             inputView.setText(inputString);
@@ -536,7 +541,22 @@ public class MainActivity extends WearableActivity {
                                             } else {
                                                 placehoderView.setText("");
                                             }
-                                            if (sourceList.size() <= 15) {
+                                            if (listSize == 60) {
+                                                convertSize = 4;
+                                            } else if (listSize == 240) {
+                                                convertSize = 9;
+                                            }
+                                            if (sourceList.size() <= convertSize && sourceList.size() != 0) {
+                                                autoToListTime = System.currentTimeMillis();
+                                                logger.fileWriteLog(
+                                                        taskTrial,
+                                                        trial,
+                                                        (System.currentTimeMillis() - startTime),
+                                                        target,
+                                                        "auto-switch",
+                                                        listview.getAdapter().getCount(),
+                                                        sourceList.indexOf(target)
+                                                );
                                                 keyboardContainer.setVisibility(View.GONE);
                                             }
                                             break;
@@ -547,7 +567,18 @@ public class MainActivity extends WearableActivity {
                                             } else {
                                                 placehoderView.setText("");
                                             }
-                                            if (inputString.length() >= 2) {
+                                            convertSize = 2;
+                                            if (inputString.length() >= convertSize && sourceList.size() != 0) {
+                                                autoToListTime = System.currentTimeMillis();
+                                                logger.fileWriteLog(
+                                                        taskTrial,
+                                                        trial,
+                                                        (System.currentTimeMillis() - startTime),
+                                                        target,
+                                                        "auto-switch",
+                                                        listview.getAdapter().getCount(),
+                                                        sourceList.indexOf(target)
+                                                );
                                                 keyboardContainer.setVisibility(View.GONE);
                                             }
                                             break;
@@ -697,7 +728,7 @@ public class MainActivity extends WearableActivity {
         String[] taskList;
         switch (userNum) {
             case 0:
-                taskList = ExpTwoTaskList.p0;
+                taskList = ExpThreeTaskList.p0;
                 if (taskTrial >= taskList.length) {
                     MainActivity.this.finish();
                     System.exit(0);
@@ -705,7 +736,7 @@ public class MainActivity extends WearableActivity {
                 setTaskSetting(taskList, taskTrial);
                 break;
             case 1:
-                taskList = ExpTwoTaskList.p1;
+                taskList = ExpThreeTaskList.p1;
                 if (taskTrial >= taskList.length) {
                     MainActivity.this.finish();
                     System.exit(0);
@@ -713,7 +744,7 @@ public class MainActivity extends WearableActivity {
                 setTaskSetting(taskList, taskTrial);
                 break;
             case 2:
-                taskList = ExpTwoTaskList.p2;
+                taskList = ExpThreeTaskList.p2;
                 if (taskTrial >= taskList.length) {
                     MainActivity.this.finish();
                     System.exit(0);
@@ -721,7 +752,7 @@ public class MainActivity extends WearableActivity {
                 setTaskSetting(taskList, taskTrial);
                 break;
             case 3:
-                taskList = ExpTwoTaskList.p3;
+                taskList = ExpThreeTaskList.p3;
                 if (taskTrial >= taskList.length) {
                     MainActivity.this.finish();
                     System.exit(0);
@@ -729,7 +760,7 @@ public class MainActivity extends WearableActivity {
                 setTaskSetting(taskList, taskTrial);
                 break;
             case 4:
-                taskList = ExpTwoTaskList.p4;
+                taskList = ExpThreeTaskList.p4;
                 if (taskTrial >= taskList.length) {
                     MainActivity.this.finish();
                     System.exit(0);
@@ -737,7 +768,7 @@ public class MainActivity extends WearableActivity {
                 setTaskSetting(taskList, taskTrial);
                 break;
             case 5:
-                taskList = ExpTwoTaskList.p5;
+                taskList = ExpThreeTaskList.p5;
                 if (taskTrial >= taskList.length) {
                     MainActivity.this.finish();
                     System.exit(0);
@@ -745,7 +776,7 @@ public class MainActivity extends WearableActivity {
                 setTaskSetting(taskList, taskTrial);
                 break;
             case 6:
-                taskList = ExpTwoTaskList.p6;
+                taskList = ExpThreeTaskList.p6;
                 if (taskTrial >= taskList.length) {
                     MainActivity.this.finish();
                     System.exit(0);
@@ -753,7 +784,7 @@ public class MainActivity extends WearableActivity {
                 setTaskSetting(taskList, taskTrial);
                 break;
             case 7:
-                taskList = ExpTwoTaskList.p7;
+                taskList = ExpThreeTaskList.p7;
                 if (taskTrial >= taskList.length) {
                     MainActivity.this.finish();
                     System.exit(0);
@@ -761,7 +792,7 @@ public class MainActivity extends WearableActivity {
                 setTaskSetting(taskList, taskTrial);
                 break;
             case 8:
-                taskList = ExpTwoTaskList.p8;
+                taskList = ExpThreeTaskList.p8;
                 if (taskTrial >= taskList.length) {
                     MainActivity.this.finish();
                     System.exit(0);
@@ -769,7 +800,7 @@ public class MainActivity extends WearableActivity {
                 setTaskSetting(taskList, taskTrial);
                 break;
             case 9:
-                taskList = ExpTwoTaskList.p9;
+                taskList = ExpThreeTaskList.p9;
                 if (taskTrial >= taskList.length) {
                     MainActivity.this.finish();
                     System.exit(0);
@@ -777,7 +808,7 @@ public class MainActivity extends WearableActivity {
                 setTaskSetting(taskList, taskTrial);
                 break;
             case 10:
-                taskList = ExpTwoTaskList.p10;
+                taskList = ExpThreeTaskList.p10;
                 if (taskTrial >= taskList.length) {
                     MainActivity.this.finish();
                     System.exit(0);
@@ -785,7 +816,7 @@ public class MainActivity extends WearableActivity {
                 setTaskSetting(taskList, taskTrial);
                 break;
             case 11:
-                taskList = ExpTwoTaskList.p11;
+                taskList = ExpThreeTaskList.p11;
                 if (taskTrial >= taskList.length) {
                     MainActivity.this.finish();
                     System.exit(0);
@@ -793,7 +824,7 @@ public class MainActivity extends WearableActivity {
                 setTaskSetting(taskList, taskTrial);
                 break;
             case 12:
-                taskList = ExpTwoTaskList.p12;
+                taskList = ExpThreeTaskList.p12;
                 if (taskTrial >= taskList.length) {
                     MainActivity.this.finish();
                     System.exit(0);
@@ -811,8 +842,12 @@ public class MainActivity extends WearableActivity {
             targetList = predefineRandom(listSize, trialLimit + 1);
             if (keyboardMode == 3) {
                 taskEndView.setText(listSize + "-" + sourceType + "-ST");
-            } else {
+            } else if (keyboardMode == 4) {
                 taskEndView.setText(listSize + "-" + sourceType + "-TSI");
+            } else if (keyboardMode == 1) {
+                taskEndView.setText(listSize + "-" + sourceType + "-LTSI");
+            } else if (keyboardMode == 2) {
+                taskEndView.setText(listSize + "-" + sourceType + "-ITSI");
             }
             listview.setVisibility(View.GONE);
             if (keyboardMode != 4) {
@@ -842,7 +877,7 @@ public class MainActivity extends WearableActivity {
         target = originSourceList.get(targetList[trial]);
         if (taskTrial == 0 && trial == 0) {
             if (keyboardMode == 1) {
-                startView.setText(listSize + "-" + sourceType + "-LTST" + "\n" + (trial + 1) + "/" + (trialLimit + 1) + "\n" + target);
+                startView.setText(listSize + "-" + sourceType + "-LTSI" + "\n" + (trial + 1) + "/" + (trialLimit + 1) + "\n" + target);
             } else if (keyboardMode == 2) {
                 startView.setText(listSize + "-" + sourceType + "-ITSI" + "\n" + (trial + 1) + "/" + (trialLimit + 1) + "\n" + target);
             } else if (keyboardMode == 3) {
