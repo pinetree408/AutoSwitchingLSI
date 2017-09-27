@@ -68,7 +68,6 @@ public class MainActivity extends WearableActivity {
     int keyboardMode;
     TextView returnKeyboardView;
 
-    Toast toast;
     TextView startView;
     View taskView;
 
@@ -127,7 +126,7 @@ public class MainActivity extends WearableActivity {
         } else {
             originSourceList = new ArrayList<>(Arrays.asList(Source.app));
         }
-        originSourceList = new ArrayList(originSourceList.subList(0, listSize));
+        originSourceList = new ArrayList<>(originSourceList.subList(0, listSize));
         Collections.sort(originSourceList);
         sourceList.addAll(originSourceList);
     }
@@ -626,7 +625,7 @@ public class MainActivity extends WearableActivity {
                                                 userNum = userNum - 1;
                                             }
                                             TextView userNumView = (TextView) findViewById(R.id.user_number);
-                                            userNumView.setText(Integer.toString(userNum));
+                                            userNumView.setText(userNum);
                                         }
                                     }
                             );
@@ -713,14 +712,19 @@ public class MainActivity extends WearableActivity {
 
         listSize = Integer.parseInt(data[1]);
         sourceType = data[0];
-        if (data[2].equals("LTSI")) {
-            keyboardMode = 1;
-        } else if (data[2].equals("ITSI")) {
-            keyboardMode = 2;
-        } else if (data[2].equals("ST")) {
-            keyboardMode = 3;
-        } else if (data[2].equals("TSI")) {
-            keyboardMode = 4;
+        switch(data[2]) {
+            case "LTSI":
+                keyboardMode = 1;
+                break;
+            case "ITSI":
+                keyboardMode = 2;
+                break;
+            case "ST":
+                keyboardMode = 3;
+                break;
+            case "TSI":
+                keyboardMode = 4;
+                break;
         }
     }
 
@@ -951,12 +955,11 @@ public class MainActivity extends WearableActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
             case REQUEST_CODE_FILE:
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED
-                        && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-                } else {
+                if (!(grantResults[0] == PackageManager.PERMISSION_GRANTED
+                        && grantResults[1] == PackageManager.PERMISSION_GRANTED)) {
                     Log.d(TAG, "Permission always deny");
                 }
                 break;
@@ -978,20 +981,14 @@ public class MainActivity extends WearableActivity {
                         REQUEST_CODE_FILE);
                 // MY_PERMISSION_REQUEST_STORAGE is an
                 // app-defined int constant
-            } else {
             }
-        } else {
         }
-
     }
 
     int[] predefineRandom(int n, int size){
         double goalMean = n/2.0;
 
         int[] ret = new int[size];
-
-        Random random = new Random();
-
         int currSize = 0;
         int retSum = 0;
         while (currSize < size - 1){
@@ -1018,8 +1015,8 @@ public class MainActivity extends WearableActivity {
     }
 
     boolean intContains(int[] A, int B) {
-        for (int i = 0; i < A.length; i++) {
-            if (A[i] == B)
+        for (int item : A) {
+            if (item == B)
                 return true;
         }
         return false;
