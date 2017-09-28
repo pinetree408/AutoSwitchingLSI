@@ -15,7 +15,6 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -150,139 +149,127 @@ public class MainActivity extends WearableActivity {
         };
         listview.setAdapter(adapter);
         listview.setBackgroundColor(Color.parseColor("#d3d3d3"));
-        listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (System.currentTimeMillis() - autoToListTime < 500) {
-                    return;
-                }
-                TextView selectedView = (TextView) view;
-                String selected = selectedView.getText().toString();
-                if (selected.equals(target)) {
-                    logger.fileWriteLog(
-                            taskTrial,
-                            trial,
-                            (System.currentTimeMillis() - startTime),
-                            target,
-                            "item-success",
-                            listview.getAdapter().getCount(),
-                            sourceList.indexOf(target)
-                    );
-                    selectedView.setBackgroundColor(Color.parseColor("#f0FF00"));
-                    successView.setVisibility(View.VISIBLE);
-                    successView.bringToFront();
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            successView.setVisibility(View.GONE);
-                            setNextTask();
-                        }
-                    }, 1000);
-                } else {
-                    logger.fileWriteLog(
-                            taskTrial,
-                            trial,
-                            (System.currentTimeMillis() - startTime),
-                            target,
-                            "item-err",
-                            listview.getAdapter().getCount(),
-                            sourceList.indexOf(target)
-                    );
-                    startTime = System.currentTimeMillis();
-                    listview.setSelectionAfterHeaderView();
-                    err = err + 1;
-                    String styledText = target + "<br/><font color='red'>" + err + "/5</font>";
-                    errView.setText(Html.fromHtml(styledText));
-                    taskView.setVisibility(View.GONE);
-                    errView.setVisibility(View.VISIBLE);
+        listview.setOnItemClickListener((parent, view, position, id) -> {
+            if (System.currentTimeMillis() - autoToListTime < 500) {
+                return;
+            }
+            TextView selectedView = (TextView) view;
+            String selected = selectedView.getText().toString();
+            if (selected.equals(target)) {
+                logger.fileWriteLog(
+                        taskTrial,
+                        trial,
+                        (System.currentTimeMillis() - startTime),
+                        target,
+                        "item-success",
+                        listview.getAdapter().getCount(),
+                        sourceList.indexOf(target)
+                );
+                selectedView.setBackgroundColor(Color.parseColor("#f0FF00"));
+                successView.setVisibility(View.VISIBLE);
+                successView.bringToFront();
+                new Handler().postDelayed(() -> {
+                    successView.setVisibility(View.GONE);
+                    setNextTask();
+                }, 1000);
+            } else {
+                logger.fileWriteLog(
+                        taskTrial,
+                        trial,
+                        (System.currentTimeMillis() - startTime),
+                        target,
+                        "item-err",
+                        listview.getAdapter().getCount(),
+                        sourceList.indexOf(target)
+                );
+                startTime = System.currentTimeMillis();
+                listview.setSelectionAfterHeaderView();
+                err = err + 1;
+                String styledText = target + "<br/><font color='red'>" + err + "/5</font>";
+                errView.setText(Html.fromHtml(styledText));
+                taskView.setVisibility(View.GONE);
+                errView.setVisibility(View.VISIBLE);
 
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            taskView.setVisibility(View.VISIBLE);
-                            if (keyboardMode == 1 || keyboardMode == 2 || keyboardMode == 4) {
-                                keyboardContainer.setVisibility(View.VISIBLE);
-                                inputString = "";
-                                setResultAtListView(inputString);
-                                inputView.setText(inputString);
-                                if (sourceList.size() != 0 && !inputString.equals("")) {
-                                    placehoderView.setText(sourceList.get(0));
-                                } else {
-                                    placehoderView.setText("");
-                                }
-                            }
-                            errView.setVisibility(View.GONE);
-                            if (err > 4) {
-                                err = 0;
-                                setNextTask();
-                            }
+                new Handler().postDelayed(() -> {
+                    taskView.setVisibility(View.VISIBLE);
+                    if (keyboardMode == 1 || keyboardMode == 2 || keyboardMode == 4) {
+                        keyboardContainer.setVisibility(View.VISIBLE);
+                        inputString = "";
+                        setResultAtListView(inputString);
+                        inputView.setText(inputString);
+                        if (sourceList.size() != 0 && !inputString.equals("")) {
+                            placehoderView.setText(sourceList.get(0));
+                        } else {
+                            placehoderView.setText("");
                         }
-                    }, 1000);
-                }
+                    }
+                    errView.setVisibility(View.GONE);
+                    if (err > 4) {
+                        err = 0;
+                        setNextTask();
+                    }
+                }, 1000);
             }
         });
-        listview.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                int tempX = (int) event.getAxisValue(MotionEvent.AXIS_X);
-                int tempY = (int) event.getAxisValue(MotionEvent.AXIS_Y);
-                long eventTime = System.currentTimeMillis();
+        listview.setOnTouchListener((v, event) -> {
+            int tempX = (int) event.getAxisValue(MotionEvent.AXIS_X);
+            int tempY = (int) event.getAxisValue(MotionEvent.AXIS_Y);
+            long eventTime = System.currentTimeMillis();
 
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        touchDownTime = eventTime;
-                        touchDownX = tempX;
-                        touchDownY = tempY;
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        long touchTime = eventTime - touchDownTime;
-                        int xDir = (int) (touchDownX - tempX);
-                        int yDir = (int) (touchDownY - tempY);
-                        int len = (int) Math.sqrt(xDir * xDir + yDir * yDir);
-                        int speed;
-                        if (touchTime > 0) {
-                            speed = (int) (len * 1000 / touchTime);
-                        } else {
-                            speed = 0;
-                        }
-                        if (len > dragThreshold) {
-                            if (speed > 400) {
-                                double angle = Math.acos((double) xDir / len) * angleFactor;
-                                if (yDir < 0) {
-                                    angle = 360 - angle;
-                                }
-                                angle += 45;
-                                int id = (int) (angle / 90);
-                                if (id > 3) {
-                                    id = 0;
-                                }
-                                switch (id) {
-                                    case 0:
-                                        // left
-                                        if (keyboardMode != 3) {
-                                            keyboardContainer.setVisibility(View.VISIBLE);
-                                        } else {
-                                            return true;
-                                        }
-                                        break;
-                                    case 1:
-                                        // top;
-                                        break;
-                                    case 2:
-                                        // right
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    touchDownTime = eventTime;
+                    touchDownX = tempX;
+                    touchDownY = tempY;
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    break;
+                case MotionEvent.ACTION_UP:
+                    long touchTime = eventTime - touchDownTime;
+                    int xDir = (int) (touchDownX - tempX);
+                    int yDir = (int) (touchDownY - tempY);
+                    int len = (int) Math.sqrt(xDir * xDir + yDir * yDir);
+                    int speed;
+                    if (touchTime > 0) {
+                        speed = (int) (len * 1000 / touchTime);
+                    } else {
+                        speed = 0;
+                    }
+                    if (len > dragThreshold) {
+                        if (speed > 400) {
+                            double angle = Math.acos((double) xDir / len) * angleFactor;
+                            if (yDir < 0) {
+                                angle = 360 - angle;
+                            }
+                            angle += 45;
+                            int id = (int) (angle / 90);
+                            if (id > 3) {
+                                id = 0;
+                            }
+                            switch (id) {
+                                case 0:
+                                    // left
+                                    if (keyboardMode != 3) {
+                                        keyboardContainer.setVisibility(View.VISIBLE);
+                                    } else {
                                         return true;
-                                    case 3:
-                                        // bottom;
-                                        break;
-                                }
+                                    }
+                                    break;
+                                case 1:
+                                    // top;
+                                    break;
+                                case 2:
+                                    // right
+                                    return true;
+                                case 3:
+                                    // bottom;
+                                    break;
                             }
                         }
-                        break;
-                }
-                return false;
+                    }
+                    break;
             }
+            return false;
         });
         if (keyboardMode == 1 || keyboardMode == 2 || keyboardMode == 4) {
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
@@ -301,25 +288,22 @@ public class MainActivity extends WearableActivity {
             returnKeyboardView.setCompoundDrawablesRelativeWithIntrinsicBounds(0, R.drawable.search, 0, 0);
             returnKeyboardView.setBackgroundColor(Color.WHITE);
             returnKeyboardView.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
-            returnKeyboardView.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    switch (event.getAction()) {
-                        case MotionEvent.ACTION_DOWN:
-                            logger.fileWriteLog(
-                                    taskTrial,
-                                    trial,
-                                    (System.currentTimeMillis() - startTime),
-                                    target,
-                                    "to-keyboard",
-                                    listview.getAdapter().getCount(),
-                                    sourceList.indexOf(target)
-                            );
-                            keyboardContainer.setVisibility(View.VISIBLE);
-                            break;
-                    }
-                    return false;
+            returnKeyboardView.setOnTouchListener((v, event) -> {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        logger.fileWriteLog(
+                                taskTrial,
+                                trial,
+                                (System.currentTimeMillis() - startTime),
+                                target,
+                                "to-keyboard",
+                                listview.getAdapter().getCount(),
+                                sourceList.indexOf(target)
+                        );
+                        keyboardContainer.setVisibility(View.VISIBLE);
+                        break;
                 }
+                return false;
             });
 
             ViewGroup taskViewGroup = (ViewGroup) findViewById(R.id.task);
@@ -342,178 +326,157 @@ public class MainActivity extends WearableActivity {
                 tapBoardView.setBackgroundColor(Color.WHITE);
                 break;
         }
-        keyboardContainer.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                int tempX = (int) event.getAxisValue(MotionEvent.AXIS_X);
-                int tempY = (int) event.getAxisValue(MotionEvent.AXIS_Y);
-                long eventTime = System.currentTimeMillis();
+        keyboardContainer.setOnTouchListener((v, event) -> {
+            int tempX = (int) event.getAxisValue(MotionEvent.AXIS_X);
+            int tempY = (int) event.getAxisValue(MotionEvent.AXIS_Y);
+            long eventTime = System.currentTimeMillis();
 
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        touchDownTime = eventTime;
-                        touchDownX = tempX;
-                        touchDownY = tempY;
-                        break;
-                    case MotionEvent.ACTION_MOVE:
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        long touchTime = eventTime - touchDownTime;
-                        int xDir = (int) (touchDownX - tempX);
-                        int yDir = (int) (touchDownY - tempY);
-                        int len = (int) Math.sqrt(xDir * xDir + yDir * yDir);
-                        int speed;
-                        if (touchTime > 0) {
-                            speed = (int) (len * 1000 / touchTime);
-                        } else {
-                            speed = 0;
-                        }
-                        if (len > dragThreshold) {
-                            if (speed > 400) {
-                                double angle = Math.acos((double) xDir / len) * angleFactor;
-                                if (yDir < 0) {
-                                    angle = 360 - angle;
-                                }
-                                angle += 45;
-                                int id = (int) (angle / 90);
-                                if (id > 3) {
-                                    id = 0;
-                                }
-                                switch (id) {
-                                    case 0:
-                                        // left
-                                        break;
-                                    case 1:
-                                        // top;
-                                        break;
-                                    case 2:
-                                        // right
-                                        break;
-                                    case 3:
-                                        // bottom;
-                                        break;
-                                }
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    touchDownTime = eventTime;
+                    touchDownX = tempX;
+                    touchDownY = tempY;
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    break;
+                case MotionEvent.ACTION_UP:
+                    long touchTime = eventTime - touchDownTime;
+                    int xDir = (int) (touchDownX - tempX);
+                    int yDir = (int) (touchDownY - tempY);
+                    int len = (int) Math.sqrt(xDir * xDir + yDir * yDir);
+                    int speed;
+                    if (touchTime > 0) {
+                        speed = (int) (len * 1000 / touchTime);
+                    } else {
+                        speed = 0;
+                    }
+                    if (len > dragThreshold) {
+                        if (speed > 400) {
+                            double angle = Math.acos((double) xDir / len) * angleFactor;
+                            if (yDir < 0) {
+                                angle = 360 - angle;
                             }
-                        } else {
-                            if (touchTime < 200) {
-                                // tap
-                                if (tempY < placehoderView.getY()) {
-                                    if ((tapBoardView.getX() + (tapBoardView.getWidth() / 2)) < tempX) {
-                                        logger.fileWriteLog(
-                                                taskTrial,
-                                                trial,
-                                                (System.currentTimeMillis() - startTime),
-                                                target,
-                                                "to-list",
-                                                listview.getAdapter().getCount(),
-                                                sourceList.indexOf(target)
-                                        );
-                                        keyboardContainer.setVisibility(View.GONE);
-                                    }
-                                } else if ((placehoderView.getY() <= tempY) && (tempY < tapBoardView.getY())) {
-                                    if (placehoderView.getText().toString().equals(target)) {
-                                        placehoderView.setBackgroundColor(Color.parseColor("#f0FF00"));
-                                        logger.fileWriteLog(
-                                                taskTrial,
-                                                trial,
-                                                (System.currentTimeMillis() - startTime),
-                                                target,
-                                                "item-success",
-                                                listview.getAdapter().getCount(),
-                                                sourceList.indexOf(target)
-                                        );
-                                        successView.setVisibility(View.VISIBLE);
-                                        successView.bringToFront();
-                                        new Handler().postDelayed(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                successView.setVisibility(View.GONE);
-                                                setNextTask();
-                                            }
-                                        }, 1000);
-                                    } else {
-                                        err = err + 1;
-                                        logger.fileWriteLog(
-                                                taskTrial,
-                                                trial,
-                                                (System.currentTimeMillis() - startTime),
-                                                target,
-                                                "item-err",
-                                                listview.getAdapter().getCount(),
-                                                sourceList.indexOf(target)
-                                        );
-                                        startTime = System.currentTimeMillis();
-                                        String styledText = target + "<br/><font color='red'>" + err + "/5</font>";
-                                        errView.setText(Html.fromHtml(styledText));
-                                        taskView.setVisibility(View.GONE);
-                                        errView.setVisibility(View.VISIBLE);
-                                        new Handler().postDelayed(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                taskView.setVisibility(View.VISIBLE);
-                                                inputString = "";
-                                                setResultAtListView(inputString);
-                                                inputView.setText(inputString);
-                                                if (sourceList.size() != 0 && !inputString.equals("")) {
-                                                    placehoderView.setText(sourceList.get(0));
-                                                } else {
-                                                    placehoderView.setText("");
-                                                }
-                                                errView.setVisibility(View.GONE);
-                                                if (err > 4) {
-                                                    err = 0;
-                                                    setNextTask();
-                                                }
-                                            }
-                                        }, 1000);
-                                    }
+                            angle += 45;
+                            int id = (int) (angle / 90);
+                            if (id > 3) {
+                                id = 0;
+                            }
+                            switch (id) {
+                                case 0:
+                                    // left
                                     break;
-                                } else if (tapBoardView.getY() + tapBoardView.getHeight() < tempY) {
+                                case 1:
+                                    // top;
+                                    break;
+                                case 2:
+                                    // right
+                                    break;
+                                case 3:
+                                    // bottom;
+                                    break;
+                            }
+                        }
+                    } else {
+                        if (touchTime < 200) {
+                            // tap
+                            if (tempY < placehoderView.getY()) {
+                                if ((tapBoardView.getX() + (tapBoardView.getWidth() / 2)) < tempX) {
                                     logger.fileWriteLog(
                                             taskTrial,
                                             trial,
                                             (System.currentTimeMillis() - startTime),
                                             target,
-                                            "delete",
+                                            "to-list",
                                             listview.getAdapter().getCount(),
                                             sourceList.indexOf(target)
                                     );
-                                    if (inputString.length() != 0) {
-                                        inputString = inputString.substring(0, inputString.length() - 1);
-                                    }
-                                    setResultAtListView(inputString);
-                                    switch (keyboardMode) {
-                                        case 0:
-                                            break;
-                                        case 3:
-                                            break;
-                                        case 1:
-                                        case 2:
-                                        case 4:
-                                            inputView.setText(inputString);
-                                            if (sourceList.size() != 0 && !inputString.equals("")) {
-                                                placehoderView.setText(sourceList.get(0));
-                                            } else {
-                                                placehoderView.setText("");
-                                            }
-                                            break;
-                                    }
+                                    keyboardContainer.setVisibility(View.GONE);
+                                }
+                            } else if ((placehoderView.getY() <= tempY) && (tempY < tapBoardView.getY())) {
+                                if (placehoderView.getText().toString().equals(target)) {
+                                    placehoderView.setBackgroundColor(Color.parseColor("#f0FF00"));
+                                    logger.fileWriteLog(
+                                            taskTrial,
+                                            trial,
+                                            (System.currentTimeMillis() - startTime),
+                                            target,
+                                            "item-success",
+                                            listview.getAdapter().getCount(),
+                                            sourceList.indexOf(target)
+                                    );
+                                    successView.setVisibility(View.VISIBLE);
+                                    successView.bringToFront();
+                                    new Handler().postDelayed(() -> {
+                                        successView.setVisibility(View.GONE);
+                                        setNextTask();
+                                    }, 1000);
                                 } else {
-                                    String[] params = getInputInfo(event);
-                                    if (params[0].equals(".")) {
-                                        logger.fileWriteLog(
-                                                taskTrial,
-                                                trial,
-                                                (System.currentTimeMillis() - startTime),
-                                                target,
-                                                params[0],
-                                                listview.getAdapter().getCount(),
-                                                sourceList.indexOf(target)
-                                        );
+                                    err = err + 1;
+                                    logger.fileWriteLog(
+                                            taskTrial,
+                                            trial,
+                                            (System.currentTimeMillis() - startTime),
+                                            target,
+                                            "item-err",
+                                            listview.getAdapter().getCount(),
+                                            sourceList.indexOf(target)
+                                    );
+                                    startTime = System.currentTimeMillis();
+                                    String styledText = target + "<br/><font color='red'>" + err + "/5</font>";
+                                    errView.setText(Html.fromHtml(styledText));
+                                    taskView.setVisibility(View.GONE);
+                                    errView.setVisibility(View.VISIBLE);
+                                    new Handler().postDelayed(() -> {
+                                        taskView.setVisibility(View.VISIBLE);
+                                        inputString = "";
+                                        setResultAtListView(inputString);
+                                        inputView.setText(inputString);
+                                        if (sourceList.size() != 0 && !inputString.equals("")) {
+                                            placehoderView.setText(sourceList.get(0));
+                                        } else {
+                                            placehoderView.setText("");
+                                        }
+                                        errView.setVisibility(View.GONE);
+                                        if (err > 4) {
+                                            err = 0;
+                                            setNextTask();
+                                        }
+                                    }, 1000);
+                                }
+                                break;
+                            } else if (tapBoardView.getY() + tapBoardView.getHeight() < tempY) {
+                                logger.fileWriteLog(
+                                        taskTrial,
+                                        trial,
+                                        (System.currentTimeMillis() - startTime),
+                                        target,
+                                        "delete",
+                                        listview.getAdapter().getCount(),
+                                        sourceList.indexOf(target)
+                                );
+                                if (inputString.length() != 0) {
+                                    inputString = inputString.substring(0, inputString.length() - 1);
+                                }
+                                setResultAtListView(inputString);
+                                switch (keyboardMode) {
+                                    case 0:
                                         break;
-                                    }
-                                    inputString += params[0];
-                                    setResultAtListView(inputString);
+                                    case 3:
+                                        break;
+                                    case 1:
+                                    case 2:
+                                    case 4:
+                                        inputView.setText(inputString);
+                                        if (sourceList.size() != 0 && !inputString.equals("")) {
+                                            placehoderView.setText(sourceList.get(0));
+                                        } else {
+                                            placehoderView.setText("");
+                                        }
+                                        break;
+                                }
+                            } else {
+                                String[] params = getInputInfo(event);
+                                if (params[0].equals(".")) {
                                     logger.fileWriteLog(
                                             taskTrial,
                                             trial,
@@ -523,80 +486,92 @@ public class MainActivity extends WearableActivity {
                                             listview.getAdapter().getCount(),
                                             sourceList.indexOf(target)
                                     );
-                                    int convertSize = 0;
-                                    switch (keyboardMode) {
-                                        case 0:
-                                            inputView.setText(inputString);
-                                            if (sourceList.size() != 0) {
-                                                placehoderView.setText(sourceList.get(0));
-                                            } else {
-                                                placehoderView.setText("");
-                                            }
-                                            break;
-                                        case 1:
-                                            inputView.setText(inputString);
-                                            if (sourceList.size() != 0) {
-                                                placehoderView.setText(sourceList.get(0));
-                                            } else {
-                                                placehoderView.setText("");
-                                            }
-                                            if (listSize == 60) {
-                                                convertSize = 4;
-                                            } else if (listSize == 240) {
-                                                convertSize = 9;
-                                            }
-                                            if (sourceList.size() <= convertSize && sourceList.size() != 0) {
-                                                autoToListTime = System.currentTimeMillis();
-                                                logger.fileWriteLog(
-                                                        taskTrial,
-                                                        trial,
-                                                        (System.currentTimeMillis() - startTime),
-                                                        target,
-                                                        "auto-switch",
-                                                        listview.getAdapter().getCount(),
-                                                        sourceList.indexOf(target)
-                                                );
-                                                keyboardContainer.setVisibility(View.GONE);
-                                            }
-                                            break;
-                                        case 2:
-                                            inputView.setText(inputString);
-                                            if (sourceList.size() != 0) {
-                                                placehoderView.setText(sourceList.get(0));
-                                            } else {
-                                                placehoderView.setText("");
-                                            }
-                                            convertSize = 2;
-                                            if (inputString.length() >= convertSize && sourceList.size() != 0) {
-                                                autoToListTime = System.currentTimeMillis();
-                                                logger.fileWriteLog(
-                                                        taskTrial,
-                                                        trial,
-                                                        (System.currentTimeMillis() - startTime),
-                                                        target,
-                                                        "auto-switch",
-                                                        listview.getAdapter().getCount(),
-                                                        sourceList.indexOf(target)
-                                                );
-                                                keyboardContainer.setVisibility(View.GONE);
-                                            }
-                                            break;
-                                        case 4:
-                                            inputView.setText(inputString);
-                                            if (sourceList.size() != 0) {
-                                                placehoderView.setText(sourceList.get(0));
-                                            } else {
-                                                placehoderView.setText("");
-                                            }
-                                            break;
-                                    }
+                                    break;
+                                }
+                                inputString += params[0];
+                                setResultAtListView(inputString);
+                                logger.fileWriteLog(
+                                        taskTrial,
+                                        trial,
+                                        (System.currentTimeMillis() - startTime),
+                                        target,
+                                        params[0],
+                                        listview.getAdapter().getCount(),
+                                        sourceList.indexOf(target)
+                                );
+                                int convertSize = 0;
+                                switch (keyboardMode) {
+                                    case 0:
+                                        inputView.setText(inputString);
+                                        if (sourceList.size() != 0) {
+                                            placehoderView.setText(sourceList.get(0));
+                                        } else {
+                                            placehoderView.setText("");
+                                        }
+                                        break;
+                                    case 1:
+                                        inputView.setText(inputString);
+                                        if (sourceList.size() != 0) {
+                                            placehoderView.setText(sourceList.get(0));
+                                        } else {
+                                            placehoderView.setText("");
+                                        }
+                                        if (listSize == 60) {
+                                            convertSize = 4;
+                                        } else if (listSize == 240) {
+                                            convertSize = 9;
+                                        }
+                                        if (sourceList.size() <= convertSize && sourceList.size() != 0) {
+                                            autoToListTime = System.currentTimeMillis();
+                                            logger.fileWriteLog(
+                                                    taskTrial,
+                                                    trial,
+                                                    (System.currentTimeMillis() - startTime),
+                                                    target,
+                                                    "auto-switch",
+                                                    listview.getAdapter().getCount(),
+                                                    sourceList.indexOf(target)
+                                            );
+                                            keyboardContainer.setVisibility(View.GONE);
+                                        }
+                                        break;
+                                    case 2:
+                                        inputView.setText(inputString);
+                                        if (sourceList.size() != 0) {
+                                            placehoderView.setText(sourceList.get(0));
+                                        } else {
+                                            placehoderView.setText("");
+                                        }
+                                        convertSize = 2;
+                                        if (inputString.length() >= convertSize && sourceList.size() != 0) {
+                                            autoToListTime = System.currentTimeMillis();
+                                            logger.fileWriteLog(
+                                                    taskTrial,
+                                                    trial,
+                                                    (System.currentTimeMillis() - startTime),
+                                                    target,
+                                                    "auto-switch",
+                                                    listview.getAdapter().getCount(),
+                                                    sourceList.indexOf(target)
+                                            );
+                                            keyboardContainer.setVisibility(View.GONE);
+                                        }
+                                        break;
+                                    case 4:
+                                        inputView.setText(inputString);
+                                        if (sourceList.size() != 0) {
+                                            placehoderView.setText(sourceList.get(0));
+                                        } else {
+                                            placehoderView.setText("");
+                                        }
+                                        break;
                                 }
                             }
                         }
-                        break;
-                }
-                return true;
+                    }
+                    break;
             }
+            return true;
         });
     }
 
@@ -610,68 +585,52 @@ public class MainActivity extends WearableActivity {
         final ViewGroup userSelecotrView = (ViewGroup) findViewById(R.id.user_selector);
         for (int i = 0; i < userSelecotrView.getChildCount(); i++) {
             final TextView childView = (TextView) userSelecotrView.getChildAt(i);
-            childView.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    switch (event.getAction()) {
-                        case MotionEvent.ACTION_DOWN:
-                            runOnUiThread(
-                                    new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            if (childView.getText().equals("Up")) {
-                                                userNum = userNum + 1;
-                                            } else if (childView.getText().equals("Down")) {
-                                                userNum = userNum - 1;
-                                            }
-                                            TextView userNumView = (TextView) findViewById(R.id.user_number);
-                                            userNumView.setText(userNum);
-                                        }
-                                    }
-                            );
-                            break;
-                    }
-                    return true;
+            childView.setOnTouchListener((v, event) -> {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        runOnUiThread(() -> {
+                            if (childView.getText().equals("Up")) {
+                                userNum = userNum + 1;
+                            } else if (childView.getText().equals("Down")) {
+                                userNum = userNum - 1;
+                            }
+                            TextView userNumView = (TextView) findViewById(R.id.user_number);
+                            userNumView.setText(userNum);
+                        });
+                        break;
                 }
+                return true;
             });
         }
 
         View nextView = findViewById(R.id.next_button);
-        nextView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
-                        runOnUiThread(
-                                new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        if (userNum == 0) {
-                                            trialLimit = 2;
-                                        }
-                                        setTaskList(userNum);
-                                        taskSelectorView.setVisibility(View.GONE);
-                                        initSourceList();
+        nextView.setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    runOnUiThread(() -> {
+                        if (userNum == 0) {
+                            trialLimit = 2;
+                        }
+                        setTaskList(userNum);
+                        taskSelectorView.setVisibility(View.GONE);
+                        initSourceList();
 
-                                        String filePath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/";
-                                        String fileName = "result_bb_" + userNum + ".csv";
-                                        Log.d(TAG, filePath + fileName);
-                                        logger = new Logger(filePath, fileName);
-                                        logger.fileOpen(userNum);
-                                        logger.fileWriteHeader(fileFormat);
+                        String filePath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/";
+                        String fileName = "result_bb_" + userNum + ".csv";
+                        Log.d(TAG, filePath + fileName);
+                        logger = new Logger(filePath, fileName);
+                        logger.fileOpen(userNum);
+                        logger.fileWriteHeader(fileFormat);
 
-                                        initListView();
-                                        initKeyboardContainer();
+                        initListView();
+                        initKeyboardContainer();
 
-                                        targetList = predefineRandom(listSize, trialLimit + 1);
-                                        setNextTask();
-                                    }
-                                }
-                        );
-                        break;
-                }
-                return true;
+                        targetList = predefineRandom(listSize, trialLimit + 1);
+                        setNextTask();
+                    });
+                    break;
             }
+            return true;
         });
 
     }
@@ -865,16 +824,13 @@ public class MainActivity extends WearableActivity {
             }
             taskEndView.setVisibility(View.VISIBLE);
             taskEndView.bringToFront();
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    taskEndView.setVisibility(View.GONE);
-                    listview.setVisibility(View.VISIBLE);
-                    initSourceList();
-                    initListView();
-                    initKeyboardContainer();
-                    setNextTask();
-                }
+            new Handler().postDelayed(() -> {
+                taskEndView.setVisibility(View.GONE);
+                listview.setVisibility(View.VISIBLE);
+                initSourceList();
+                initListView();
+                initKeyboardContainer();
+                setNextTask();
             }, 5000);
             return;
         }
@@ -915,39 +871,24 @@ public class MainActivity extends WearableActivity {
                 new TimerTask() {
                     @Override
                     public void run() {
-                        runOnUiThread(
-                                new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        startView.setBackgroundColor(Color.parseColor("#f08080"));
-                                    }
-                                }
-                        );
-                        startView.setOnTouchListener(new View.OnTouchListener() {
-                            @Override
-                            public boolean onTouch(View v, MotionEvent event) {
-                                switch (event.getAction()) {
-                                    case MotionEvent.ACTION_DOWN:
-                                        runOnUiThread(
-                                                new Runnable() {
-                                                    @Override
-                                                    public void run() {
-                                                        startView.setBackgroundColor(Color.parseColor("#ffffff"));
-                                                        startView.setVisibility(View.GONE);
-                                                        taskView.setVisibility(View.VISIBLE);
-                                                        if (keyboardMode != 3) {
-                                                            keyboardContainer.setVisibility(View.VISIBLE);
-                                                            keyboardContainer.setBackgroundColor(Color.WHITE);
-                                                        }
-                                                        trial = trial + 1;
-                                                        startTime = System.currentTimeMillis();
-                                                    }
-                                                }
-                                        );
-                                        break;
-                                }
-                                return true;
+                        runOnUiThread(() -> startView.setBackgroundColor(Color.parseColor("#f08080")));
+                        startView.setOnTouchListener((v, event) -> {
+                            switch (event.getAction()) {
+                                case MotionEvent.ACTION_DOWN:
+                                    runOnUiThread(() -> {
+                                        startView.setBackgroundColor(Color.parseColor("#ffffff"));
+                                        startView.setVisibility(View.GONE);
+                                        taskView.setVisibility(View.VISIBLE);
+                                        if (keyboardMode != 3) {
+                                            keyboardContainer.setVisibility(View.VISIBLE);
+                                            keyboardContainer.setBackgroundColor(Color.WHITE);
+                                        }
+                                        trial = trial + 1;
+                                        startTime = System.currentTimeMillis();
+                                    });
+                                    break;
                             }
+                            return true;
                         });
                     }
                 },
