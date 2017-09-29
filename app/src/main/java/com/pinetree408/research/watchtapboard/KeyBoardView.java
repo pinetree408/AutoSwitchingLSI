@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * TODO: document your custom view class.
  */
-public class TapBoardView extends View {
+public class KeyBoardView extends View {
 
     char[] keyboardCharList = {
             'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p',
@@ -38,17 +38,17 @@ public class TapBoardView extends View {
 
     Paint keyboardPaint;
 
-    public TapBoardView(Context context) {
+    public KeyBoardView(Context context) {
         super(context);
         init(null, 0);
     }
 
-    public TapBoardView(Context context, AttributeSet attrs) {
+    public KeyBoardView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init(attrs, 0);
     }
 
-    public TapBoardView(Context context, AttributeSet attrs, int defStyle) {
+    public KeyBoardView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         init(attrs, defStyle);
     }

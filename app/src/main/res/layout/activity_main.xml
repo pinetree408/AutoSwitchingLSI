@@ -156,7 +156,7 @@
                 android:gravity="center"
                 android:layout_weight="1"
                 />
-            <com.pinetree408.research.watchtapboard.TapBoardView
+            <com.pinetree408.research.watchtapboard.KeyBoardView
                 android:id="@+id/tapboard"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
@@ -198,6 +198,7 @@
             android:id="@+id/list_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="#d3d3d3"
             android:scrollbarThumbVertical="@drawable/scrollbar_vertical_thumb"
             android:scrollbarTrackVertical="@drawable/scrollbar_vertical_track"
             android:scrollbarSize="6dp"
