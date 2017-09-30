@@ -1,2 +1,2 @@
 # WatchTapBoard
-> android custom keyboard & list view interface for menu select
+> android custom keyboard view & list view interface for menu select

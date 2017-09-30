@@ -93,10 +93,8 @@ public class KeyBoardView extends View {
         super.onDraw(canvas);
 
         double viewWidth = getWidth();
-        double viewHeight = getHeight();
 
         double keyWidth = viewWidth / 10;
-        //double keyHeight = viewHeight / 4;
         double keyHeight = keyWidth * 1.5;
 
         keyboardPaint.setTextSize((float) (keyHeight * 0.8));
@@ -111,7 +109,6 @@ public class KeyBoardView extends View {
 
         double keyboardPaddingLeft = (viewWidth - (10 * keyWidth)) * 0.5;
         double keyboardPaddingTop = 10;
-        //double keyboardPaddingTop = (viewHeight - (3 * keyHeight)) * 0.4;
 
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < keyboardChar[i].length; j++) {
