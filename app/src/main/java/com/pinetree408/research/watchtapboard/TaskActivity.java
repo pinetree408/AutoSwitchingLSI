@@ -1,6 +1,7 @@
 package com.pinetree408.research.watchtapboard;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -9,14 +10,19 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.wearable.activity.WearableActivity;
 import android.text.Html;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.HorizontalScrollView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -59,7 +65,10 @@ public class TaskActivity extends WearableActivity {
     ListView listview;
 
     TextView inputView;
-    TextView placehoderView;
+    LinearLayout placeholderContainer;
+    TextView placeholderTextView;
+    MyRecyclerViewAdapter placeholderAdapter;
+    RecyclerView placeholderRecyclerView;
     KeyBoardView keyBoardView;
 
     String inputString;
@@ -69,11 +78,13 @@ public class TaskActivity extends WearableActivity {
     private Timer jobScheduler;
     String target;
     int[] targetIndexList;
-    // 0 : tapboard
-    // 1 : list based
-    // 2 : input based
-    // 3 : Swipe & Tap
-    // 4 : TSI
+
+    static final int LTSI = 1;
+    static final int ITSI = 2;
+    static final int ST = 3;
+    static final int TSI = 4;
+    static final int HTSI = 5;
+
     int keyboardMode;
     TextView returnKeyboardView;
 
@@ -100,7 +111,7 @@ public class TaskActivity extends WearableActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task);
 
-        Intent intent=new Intent(this.getIntent());
+        Intent intent = new Intent(this.getIntent());
         userNum =intent.getIntExtra("userNum", 0);
 
         setAmbientEnabled();
@@ -116,7 +127,22 @@ public class TaskActivity extends WearableActivity {
 
         listview = (ListView) findViewById(R.id.list_view);
         inputView = (TextView) findViewById(R.id.input);
-        placehoderView = (TextView) findViewById(R.id.place_holder);
+        placeholderContainer = (LinearLayout) findViewById(R.id.place_holder);
+
+        // place holder init
+        placeholderTextView = new TextView(this);
+        placeholderTextView.setHeight(64);
+        placeholderTextView.setMinimumHeight(64);
+        placeholderTextView.setWidth(320);
+        placeholderTextView.setMinimumWidth(320);
+        placeholderTextView.setTextColor(Color.GREEN);
+        placeholderTextView.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
+
+        placeholderRecyclerView = new RecyclerView(this);
+        placeholderRecyclerView.setMinimumHeight(64);
+        placeholderRecyclerView.setMinimumWidth(320);
+        placeholderRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+
         keyBoardView = (KeyBoardView) findViewById(R.id.tapboard);
         keyboardContainer = findViewById(R.id.keyboard_container);
 
@@ -188,13 +214,18 @@ public class TaskActivity extends WearableActivity {
         };
         listview.setAdapter(adapter);
         listview.setOnItemClickListener((parent, view, position, id) -> {
-            if (System.currentTimeMillis() - autoToListTime < 500) {
-                return;
+            if ((System.currentTimeMillis() - autoToListTime) >= 500) {
+                checkSelectedItem((TextView) view);
             }
-            checkSelectedItem((TextView) view);
         });
 
-        if (keyboardMode == 1 || keyboardMode == 2 || keyboardMode == 4) {
+        placeholderAdapter = new MyRecyclerViewAdapter(this, sourceList);
+        placeholderAdapter.setClickListener((view, position) -> {
+            checkSelectedItem((TextView) view);
+        });
+        placeholderRecyclerView.setAdapter(placeholderAdapter);
+
+        if (keyboardMode == LTSI || keyboardMode == ITSI || keyboardMode == TSI) {
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.MATCH_PARENT,
                     RelativeLayout.LayoutParams.MATCH_PARENT
@@ -272,17 +303,19 @@ public class TaskActivity extends WearableActivity {
 
             new Handler().postDelayed(() -> {
                 taskView.setVisibility(View.VISIBLE);
-                if (keyboardMode == 1 || keyboardMode == 2 || keyboardMode == 4) {
+
+                if (keyboardMode == LTSI || keyboardMode == ITSI || keyboardMode == TSI) {
                     keyboardContainer.setVisibility(View.VISIBLE);
                     inputString = "";
                     setResultAtListView(inputString);
                     inputView.setText(inputString);
                     if (sourceList.size() != 0 && !inputString.equals("")) {
-                        placehoderView.setText(sourceList.get(0));
+                        placeholderTextView.setText(sourceList.get(0));
                     } else {
-                        placehoderView.setText("");
+                        placeholderTextView.setText("");
                     }
                 }
+
                 errView.setVisibility(View.GONE);
                 if (err > 4) {
                     err = 0;
@@ -295,15 +328,15 @@ public class TaskActivity extends WearableActivity {
     public void initKeyboardContainer() {
         inputString = "";
         keyboardContainer.bringToFront();
+
         switch (keyboardMode) {
-            case 0:
-                break;
-            case 3:
+            case ST:
                 keyboardContainer.setVisibility(View.GONE);
                 break;
-            case 1:
-            case 2:
-            case 4:
+            case LTSI:
+            case ITSI:
+            case TSI:
+            case HTSI:
                 keyBoardView.setBackgroundColor(Color.WHITE);
                 break;
         }
@@ -360,7 +393,7 @@ public class TaskActivity extends WearableActivity {
                     } else {
                         if (touchTime < 200) {
                             // tap
-                            if (tempY < placehoderView.getY()) {
+                            if (tempY < placeholderContainer.getY()) {
                                 if ((keyBoardView.getX() + (keyBoardView.getWidth() / 2)) < tempX) {
                                     logger.fileWriteLog(
                                             taskTrial,
@@ -371,10 +404,12 @@ public class TaskActivity extends WearableActivity {
                                             listview.getAdapter().getCount(),
                                             sourceList.indexOf(target)
                                     );
-                                    keyboardContainer.setVisibility(View.GONE);
+                                    if (keyboardMode != HTSI) {
+                                        keyboardContainer.setVisibility(View.GONE);
+                                    }
                                 }
-                            } else if ((placehoderView.getY() <= tempY) && (tempY < keyBoardView.getY())) {
-                                checkSelectedItem(placehoderView);
+                            } else if ((placeholderContainer.getY() <= tempY) && (tempY < keyBoardView.getY())) {
+                                checkSelectedItem(placeholderTextView);
                             } else if (keyBoardView.getY() + keyBoardView.getHeight() < tempY) {
                                 logger.fileWriteLog(
                                         taskTrial,
@@ -389,18 +424,19 @@ public class TaskActivity extends WearableActivity {
                                     inputString = inputString.substring(0, inputString.length() - 1);
                                 }
                                 setResultAtListView(inputString);
+
                                 switch (keyboardMode) {
-                                    case 0:
-                                    case 3:
+                                    case ST:
                                         break;
-                                    case 1:
-                                    case 2:
-                                    case 4:
+                                    case LTSI:
+                                    case ITSI:
+                                    case TSI:
+                                    case HTSI:
                                         inputView.setText(inputString);
                                         if (sourceList.size() != 0 && !inputString.equals("")) {
-                                            placehoderView.setText(sourceList.get(0));
+                                            placeholderTextView.setText(sourceList.get(0));
                                         } else {
-                                            placehoderView.setText("");
+                                            placeholderTextView.setText("");
                                         }
                                         break;
                                 }
@@ -432,15 +468,17 @@ public class TaskActivity extends WearableActivity {
                                 int convertSize = 0;
                                 inputView.setText(inputString);
                                 if (sourceList.size() != 0) {
-                                    placehoderView.setText(sourceList.get(0));
+                                    placeholderTextView.setText(sourceList.get(0));
                                 } else {
-                                    placehoderView.setText("");
+                                    placeholderTextView.setText("");
                                 }
+
                                 switch (keyboardMode) {
-                                    case 0:
-                                    case 4:
+                                    case ST:
+                                    case TSI:
+                                    case HTSI:
                                         break;
-                                    case 1:
+                                    case LTSI:
                                         if (listSize == 60) {
                                             convertSize = 4;
                                         } else if (listSize == 240) {
@@ -460,7 +498,7 @@ public class TaskActivity extends WearableActivity {
                                             keyboardContainer.setVisibility(View.GONE);
                                         }
                                         break;
-                                    case 2:
+                                    case ITSI:
                                         convertSize = 2;
                                         if (inputString.length() >= convertSize && sourceList.size() != 0) {
                                             autoToListTime = System.currentTimeMillis();
@@ -501,6 +539,8 @@ public class TaskActivity extends WearableActivity {
         }
         adapter.notifyDataSetChanged();
         listview.setSelectionAfterHeaderView();
+
+        placeholderAdapter.notifyDataSetChanged();
     }
 
     public String[] getInputInfo(MotionEvent event) {
@@ -520,18 +560,22 @@ public class TaskActivity extends WearableActivity {
         String[] data = taskSet.split(", ");
         listSize = Integer.parseInt(data[1]);
         sourceType = data[0];
+
         switch(data[2]) {
             case "LTSI":
-                keyboardMode = 1;
+                keyboardMode = LTSI;
                 break;
             case "ITSI":
-                keyboardMode = 2;
+                keyboardMode = ITSI;
                 break;
             case "ST":
-                keyboardMode = 3;
+                keyboardMode = ST;
                 break;
             case "TSI":
-                keyboardMode = 4;
+                keyboardMode = TSI;
+                break;
+            case "HTSI":
+                keyboardMode = HTSI;
                 break;
         }
     }
@@ -556,23 +600,36 @@ public class TaskActivity extends WearableActivity {
     public String changeKeyboardModeType(int keyboardMode) {
         String keyboardModeString = "";
         switch(keyboardMode) {
-            case 1:
+            case LTSI:
                 keyboardModeString = "LTSI";
                 break;
-            case 2:
+            case ITSI:
                 keyboardModeString = "ITSI";
                 break;
-            case 3:
+            case ST:
                 keyboardModeString = "ST";
                 break;
-            case 4:
+            case TSI:
                 keyboardModeString = "TSI";
+                break;
+            case HTSI:
+                keyboardModeString = "HTSI";
                 break;
         }
         return keyboardModeString;
     }
 
     public void setNextTask() {
+
+        placeholderContainer.removeAllViews();
+
+        if (keyboardMode != HTSI) {
+            placeholderContainer.addView(placeholderTextView);
+        } else {
+            placeholderContainer.addView(placeholderRecyclerView);
+        }
+
+
         if (trial > trialLimit) {
             trial = 0;
             taskTrial = taskTrial + 1;
@@ -580,7 +637,8 @@ public class TaskActivity extends WearableActivity {
             targetIndexList = Util.predefineRandom(listSize, trialLimit + 1);
             taskEndView.setText(listSize + "-" + sourceType + "-" + changeKeyboardModeType(keyboardMode));
             listview.setVisibility(View.GONE);
-            if (keyboardMode != 4) {
+
+            if (keyboardMode != TSI || keyboardMode != HTSI) {
                 RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
                         RelativeLayout.LayoutParams.MATCH_PARENT,
                         RelativeLayout.LayoutParams.MATCH_PARENT
@@ -599,58 +657,60 @@ public class TaskActivity extends WearableActivity {
                 initKeyboardContainer();
                 setNextTask();
             }, 5000);
-            return;
-        }
-        target = originSourceList.get(targetIndexList[trial]);
-        if (taskTrial == 0 && trial == 0) {
-            startView.setText(listSize + "-" + sourceType + "-" + changeKeyboardModeType(keyboardMode) + "\n" + (trial + 1) + "/" + (trialLimit + 1) + "\n" + target);
         } else {
-            startView.setText((trial + 1) + "/" + (trialLimit + 1) + "\n" + target);
+            target = originSourceList.get(targetIndexList[trial]);
+            if (taskTrial == 0 && trial == 0) {
+                startView.setText(listSize + "-" + sourceType + "-" + changeKeyboardModeType(keyboardMode) + "\n" + (trial + 1) + "/" + (trialLimit + 1) + "\n" + target);
+            } else {
+                startView.setText((trial + 1) + "/" + (trialLimit + 1) + "\n" + target);
+            }
+            startView.setVisibility(View.VISIBLE);
+            startView.setOnTouchListener(null);
+            taskView.setVisibility(View.GONE);
+            inputString = "";
+            err = 0;
+            inputView.setText(inputString);
+            placeholderTextView.setText(inputString);
+            setResultAtListView(inputString);
+
+            switch (keyboardMode) {
+                case ST:
+                    break;
+                case LTSI:
+                case ITSI:
+                case TSI:
+                case HTSI:
+                    placeholderTextView.setBackgroundColor(Color.WHITE);
+                    break;
+            }
+
+            jobScheduler.schedule(
+                    new TimerTask() {
+                        @Override
+                        public void run() {
+                            runOnUiThread(() -> startView.setBackgroundColor(Color.parseColor("#f08080")));
+                            startView.setOnTouchListener((v, event) -> {
+                                switch (event.getAction()) {
+                                    case MotionEvent.ACTION_DOWN:
+                                        runOnUiThread(() -> {
+                                            startView.setBackgroundColor(Color.parseColor("#ffffff"));
+                                            startView.setVisibility(View.GONE);
+                                            taskView.setVisibility(View.VISIBLE);
+                                            if (keyboardMode != ST) {
+                                                keyboardContainer.setVisibility(View.VISIBLE);
+                                                keyboardContainer.setBackgroundColor(Color.WHITE);
+                                            }
+                                            trial = trial + 1;
+                                            startTime = System.currentTimeMillis();
+                                        });
+                                        break;
+                                }
+                                return true;
+                            });
+                        }
+                    },
+                    2000);
         }
-        startView.setVisibility(View.VISIBLE);
-        startView.setOnTouchListener(null);
-        taskView.setVisibility(View.GONE);
-        inputString = "";
-        err = 0;
-        inputView.setText(inputString);
-        placehoderView.setText(inputString);
-        setResultAtListView(inputString);
-        switch (keyboardMode) {
-            case 0:
-            case 3:
-                break;
-            case 1:
-            case 2:
-            case 4:
-                placehoderView.setBackgroundColor(Color.WHITE);
-                break;
-        }
-        jobScheduler.schedule(
-                new TimerTask() {
-                    @Override
-                    public void run() {
-                        runOnUiThread(() -> startView.setBackgroundColor(Color.parseColor("#f08080")));
-                        startView.setOnTouchListener((v, event) -> {
-                            switch (event.getAction()) {
-                                case MotionEvent.ACTION_DOWN:
-                                    runOnUiThread(() -> {
-                                        startView.setBackgroundColor(Color.parseColor("#ffffff"));
-                                        startView.setVisibility(View.GONE);
-                                        taskView.setVisibility(View.VISIBLE);
-                                        if (keyboardMode != 3) {
-                                            keyboardContainer.setVisibility(View.VISIBLE);
-                                            keyboardContainer.setBackgroundColor(Color.WHITE);
-                                        }
-                                        trial = trial + 1;
-                                        startTime = System.currentTimeMillis();
-                                    });
-                                    break;
-                            }
-                            return true;
-                        });
-                    }
-                },
-                2000);
     }
 
     @Override
