@@ -1,4 +1,4 @@
-package com.pinetree408.research.watchtapboard;
+package com.pinetree408.research.watchtapboard.util;
 
 /**
  * Created by leesangyoon on 2017. 8. 15..
@@ -11,6 +11,8 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
+
+import com.pinetree408.research.watchtapboard.R;
 
 import java.util.ArrayList;
 import java.util.List;

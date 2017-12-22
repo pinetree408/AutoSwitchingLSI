@@ -1,4 +1,4 @@
-package com.pinetree408.research.watchtapboard;
+package com.pinetree408.research.watchtapboard.exp.tasklist;
 
 /**
  * Created by leesangyoon on 2017. 9. 10..
@@ -7,7 +7,7 @@ package com.pinetree408.research.watchtapboard;
 public class ExpThreeTaskList {
 
     public static String[] p0 = {
-            "person, 15, ST",
+            "person, 240, ST",
             "person, 60, ST",
             "person, 240, ST",
             "person, 240, TSI",
