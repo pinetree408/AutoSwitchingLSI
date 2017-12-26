@@ -2,6 +2,8 @@ package com.pinetree408.research.watchtapboard;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,7 +42,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     public void onBindViewHolder(ViewHolder holder, int position) {
         String animal = mData.get(position);
         holder.myTextView.setText(animal);
-        holder.myTextView.setBackgroundColor(Color.WHITE);
+        holder.myTextView.setBackgroundResource(R.drawable.border);
     }
 
     // total number of rows
@@ -56,7 +58,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
 
         public ViewHolder(View itemView) {
             super(itemView);
-            myTextView = (TextView) itemView.findViewById(R.id.tvAnimalName);
+            myTextView = (TextView) itemView.findViewById(R.id.recyclerview_item);
             itemView.setOnClickListener(this);
         }
 

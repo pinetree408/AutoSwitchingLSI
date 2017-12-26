@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TextView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="160px"
+    android:layout_width="wrap_content"
     android:layout_height="match_parent"
-    android:id="@+id/tvAnimalName"
+    android:id="@+id/recyclerview_item"
     android:textColor="@color/green"
     android:textAlignment="center"
     android:gravity="center"
+    android:paddingRight="10dp"
+    android:paddingLeft="10dp"
+    android:background="@drawable/border"
     />

@@ -1,7 +1,6 @@
 package com.pinetree408.research.watchtapboard;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -16,12 +15,10 @@ import android.support.wearable.activity.WearableActivity;
 import android.text.Html;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -186,7 +183,7 @@ public class TaskActivity extends WearableActivity {
     public void initSourceList() {
         sourceList = new ArrayList<>();
         if (sourceType.equals("person")) {
-            originSourceList = new ArrayList<>(Arrays.asList(Source.name));
+            originSourceList = new ArrayList<>(Arrays.asList(Source.fullName));
         } else {
             originSourceList = new ArrayList<>(Arrays.asList(Source.app));
         }
@@ -196,19 +193,12 @@ public class TaskActivity extends WearableActivity {
     }
 
     public void initListView() {
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, sourceList) {
+        adapter = new ArrayAdapter<String>(this, R.layout.listview_item, sourceList) {
             @NonNull
             @Override
             public View getView(int position, View convertView, @NonNull ViewGroup parent) {
                 View view = super.getView(position, convertView, parent);
-                TextView tv = (TextView) view.findViewById(android.R.id.text1);
-                tv.setHeight(46);
-                tv.setMinimumHeight(46);
-                tv.setTextColor(Color.BLACK);
-                tv.setBackgroundColor(Color.WHITE);
-                tv.setGravity(Gravity.CENTER);
-                tv.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-                tv.setTextSize(11);
+                view.setBackgroundColor(Color.WHITE);
                 return view;
             }
         };
@@ -295,6 +285,8 @@ public class TaskActivity extends WearableActivity {
             );
             startTime = System.currentTimeMillis();
             listview.setSelectionAfterHeaderView();
+            placeholderRecyclerView.getLayoutManager().scrollToPosition(0);
+
             err = err + 1;
             String styledText = target + "<br/><font color='red'>" + err + "/5</font>";
             errView.setText(Html.fromHtml(styledText));
@@ -539,6 +531,7 @@ public class TaskActivity extends WearableActivity {
         }
         adapter.notifyDataSetChanged();
         listview.setSelectionAfterHeaderView();
+        placeholderRecyclerView.getLayoutManager().scrollToPosition(0);
 
         placeholderAdapter.notifyDataSetChanged();
     }

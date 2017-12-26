@@ -8,6 +8,7 @@ public class ExpThreeTaskList {
 
     public static String[] p0 = {
             "person, 60, HTSI",
+            "person, 60, ST",
             "person, 60, TSI",
             "person, 60, ITSI",
             "person, 60, LTSI",
