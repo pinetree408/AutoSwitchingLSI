@@ -35,6 +35,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -49,7 +50,6 @@ public class TaskActivity extends WearableActivity {
 
     // Gesture Variable
     private int dragThreshold = 30;
-    private final double angleFactor = (double) 180 / Math.PI;
 
     private long touchDownTime;
     private float touchDownX, touchDownY;
@@ -210,9 +210,7 @@ public class TaskActivity extends WearableActivity {
         });
 
         placeholderAdapter = new MyRecyclerViewAdapter(this, sourceList);
-        placeholderAdapter.setClickListener((view, position) -> {
-            checkSelectedItem((TextView) view);
-        });
+        placeholderAdapter.setClickListener((view, position) -> checkSelectedItem((TextView) view));
         placeholderRecyclerView.setAdapter(placeholderAdapter);
 
         if (keyboardMode == LTSI || keyboardMode == ITSI || keyboardMode == TSI) {
@@ -232,9 +230,10 @@ public class TaskActivity extends WearableActivity {
             returnKeyboardView.setCompoundDrawablesRelativeWithIntrinsicBounds(0, R.drawable.search, 0, 0);
             returnKeyboardView.setBackgroundColor(Color.WHITE);
             returnKeyboardView.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
+
             returnKeyboardView.setOnTouchListener((v, event) -> {
                 switch (event.getAction()) {
-                    case MotionEvent.ACTION_DOWN:
+                    case MotionEvent.ACTION_UP:
                         logger.fileWriteLog(
                                 taskTrial,
                                 trial,
@@ -296,7 +295,7 @@ public class TaskActivity extends WearableActivity {
             new Handler().postDelayed(() -> {
                 taskView.setVisibility(View.VISIBLE);
 
-                if (keyboardMode == LTSI || keyboardMode == ITSI || keyboardMode == TSI) {
+                if (keyboardMode == LTSI || keyboardMode == ITSI || keyboardMode == TSI || keyboardMode == HTSI) {
                     keyboardContainer.setVisibility(View.VISIBLE);
                     inputString = "";
                     setResultAtListView(inputString);
@@ -350,39 +349,8 @@ public class TaskActivity extends WearableActivity {
                     int xDir = (int) (touchDownX - tempX);
                     int yDir = (int) (touchDownY - tempY);
                     int len = (int) Math.sqrt(xDir * xDir + yDir * yDir);
-                    int speed;
-                    if (touchTime > 0) {
-                        speed = (int) (len * 1000 / touchTime);
-                    } else {
-                        speed = 0;
-                    }
-                    if (len > dragThreshold) {
-                        if (speed > 400) {
-                            double angle = Math.acos((double) xDir / len) * angleFactor;
-                            if (yDir < 0) {
-                                angle = 360 - angle;
-                            }
-                            angle += 45;
-                            int id = (int) (angle / 90);
-                            if (id > 3) {
-                                id = 0;
-                            }
-                            switch (id) {
-                                case 0:
-                                    // left
-                                    break;
-                                case 1:
-                                    // top;
-                                    break;
-                                case 2:
-                                    // right
-                                    break;
-                                case 3:
-                                    // bottom;
-                                    break;
-                            }
-                        }
-                    } else {
+
+                    if (len <= dragThreshold) {
                         if (touchTime < 200) {
                             // tap
                             if (tempY < placeholderContainer.getY()) {
@@ -510,6 +478,7 @@ public class TaskActivity extends WearableActivity {
                             }
                         }
                     }
+                    v.performClick();
                     break;
             }
             return true;
@@ -523,7 +492,7 @@ public class TaskActivity extends WearableActivity {
         } else {
             ArrayList<String> tempList = new ArrayList<>();
             for (String item : originSourceList) {
-                if (item.startsWith(inputString)) {
+                if (item.replace(" ", "").startsWith(inputString)) {
                     tempList.add(item);
                 }
             }
@@ -531,9 +500,9 @@ public class TaskActivity extends WearableActivity {
         }
         adapter.notifyDataSetChanged();
         listview.setSelectionAfterHeaderView();
-        placeholderRecyclerView.getLayoutManager().scrollToPosition(0);
 
         placeholderAdapter.notifyDataSetChanged();
+        placeholderRecyclerView.getLayoutManager().scrollToPosition(0);
     }
 
     public String[] getInputInfo(MotionEvent event) {
@@ -574,20 +543,23 @@ public class TaskActivity extends WearableActivity {
     }
 
     public void setTaskList(int userNum) {
-        Field[] declaredFields = ExpThreeTaskList.class.getDeclaredFields();
-
-        String[] taskList = null;
         try {
-            taskList = (String[]) declaredFields[userNum].get(ExpThreeTaskList.class);
+            Field[] fields = ExpThreeTaskList.class.getDeclaredFields();
+            HashMap<String, String[]> taskListSet = new HashMap<>();
+            for (Field f : fields) {
+                if (f.get(null) instanceof String[]) {
+                    taskListSet.put(f.getName(), (String[]) f.get(null));
+                }
+            }
+            String[] taskList = taskListSet.get("p" + userNum);
+            if (taskTrial >= taskList.length) {
+                TaskActivity.this.finish();
+                System.exit(0);
+            }
+            setTaskSetting(taskList, taskTrial);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
-
-        if (taskTrial >= taskList.length) {
-            TaskActivity.this.finish();
-            System.exit(0);
-        }
-        setTaskSetting(taskList, taskTrial);
     }
 
     public String changeKeyboardModeType(int keyboardMode) {
@@ -628,7 +600,8 @@ public class TaskActivity extends WearableActivity {
             taskTrial = taskTrial + 1;
             setTaskList(userNum);
             targetIndexList = Util.predefineRandom(listSize, trialLimit + 1);
-            taskEndView.setText(listSize + "-" + sourceType + "-" + changeKeyboardModeType(keyboardMode));
+            String taskEndIndicator = listSize + "-" + sourceType + "-" + changeKeyboardModeType(keyboardMode);
+            taskEndView.setText(taskEndIndicator);
             listview.setVisibility(View.GONE);
 
             if (keyboardMode != TSI || keyboardMode != HTSI) {
@@ -652,11 +625,11 @@ public class TaskActivity extends WearableActivity {
             }, 5000);
         } else {
             target = originSourceList.get(targetIndexList[trial]);
+            String taskStartIndicator = (trial + 1) + "/" + (trialLimit + 1) + "\n" + target;
             if (taskTrial == 0 && trial == 0) {
-                startView.setText(listSize + "-" + sourceType + "-" + changeKeyboardModeType(keyboardMode) + "\n" + (trial + 1) + "/" + (trialLimit + 1) + "\n" + target);
-            } else {
-                startView.setText((trial + 1) + "/" + (trialLimit + 1) + "\n" + target);
+                taskStartIndicator = listSize + "-" + sourceType + "-" + changeKeyboardModeType(keyboardMode) + "\n" + taskStartIndicator;
             }
+            startView.setText(taskStartIndicator);
             startView.setVisibility(View.VISIBLE);
             startView.setOnTouchListener(null);
             taskView.setVisibility(View.GONE);
@@ -684,7 +657,7 @@ public class TaskActivity extends WearableActivity {
                             runOnUiThread(() -> startView.setBackgroundColor(Color.parseColor("#f08080")));
                             startView.setOnTouchListener((v, event) -> {
                                 switch (event.getAction()) {
-                                    case MotionEvent.ACTION_DOWN:
+                                    case MotionEvent.ACTION_UP:
                                         runOnUiThread(() -> {
                                             startView.setBackgroundColor(Color.parseColor("#ffffff"));
                                             startView.setVisibility(View.GONE);

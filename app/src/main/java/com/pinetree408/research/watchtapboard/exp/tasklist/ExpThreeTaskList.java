@@ -7,11 +7,11 @@ package com.pinetree408.research.watchtapboard.exp.tasklist;
 public class ExpThreeTaskList {
 
     public static String[] p0 = {
-            "person, 60, HTSI",
-            "person, 60, ST",
-            "person, 60, TSI",
-            "person, 60, ITSI",
-            "person, 60, LTSI",
+            "person, 240, TSI",
+            "person, 240, HTSI",
+            "person, 240, ST",
+            "person, 240, ITSI",
+            "person, 240, LTSI",
     };
 
     public static String[] p1 = {
