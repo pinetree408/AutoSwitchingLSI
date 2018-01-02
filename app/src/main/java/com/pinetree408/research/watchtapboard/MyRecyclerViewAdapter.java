@@ -22,11 +22,19 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     private List<String> mData = Collections.emptyList();
     private LayoutInflater mInflater;
     private ItemClickListener mClickListener;
+    private boolean twoLine;
 
     // data is passed into the constructor
     public MyRecyclerViewAdapter(Context context, List<String> data) {
         this.mInflater = LayoutInflater.from(context);
         this.mData = data;
+        this.twoLine = false;
+    }
+
+    public MyRecyclerViewAdapter(Context context, List<String> data, boolean twoLine) {
+        this.mInflater = LayoutInflater.from(context);
+        this.mData = data;
+        this.twoLine = twoLine;
     }
 
     // inflates the row layout from xml when needed
@@ -41,6 +49,9 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         String animal = mData.get(position);
+        if (twoLine) {
+            animal = animal.split(" ")[0] + "\n" + animal.split(" ")[1];
+        }
         holder.myTextView.setText(animal);
         holder.myTextView.setBackgroundResource(R.drawable.border);
     }
