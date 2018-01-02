@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.wearable.activity.WearableActivity;
@@ -81,6 +82,7 @@ public class TaskActivity extends WearableActivity {
     static final int ST = 3;
     static final int TSI = 4;
     static final int HTSI = 5;
+    static final int TSIS = 6;
 
     int keyboardMode;
     TextView returnKeyboardView;
@@ -213,7 +215,7 @@ public class TaskActivity extends WearableActivity {
         placeholderAdapter.setClickListener((view, position) -> checkSelectedItem((TextView) view));
         placeholderRecyclerView.setAdapter(placeholderAdapter);
 
-        if (keyboardMode == LTSI || keyboardMode == ITSI || keyboardMode == TSI) {
+        if (keyboardMode == LTSI || keyboardMode == ITSI || keyboardMode == TSI || keyboardMode == TSIS) {
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.MATCH_PARENT,
                     RelativeLayout.LayoutParams.MATCH_PARENT
@@ -295,7 +297,7 @@ public class TaskActivity extends WearableActivity {
             new Handler().postDelayed(() -> {
                 taskView.setVisibility(View.VISIBLE);
 
-                if (keyboardMode == LTSI || keyboardMode == ITSI || keyboardMode == TSI || keyboardMode == HTSI) {
+                if (keyboardMode == LTSI || keyboardMode == ITSI || keyboardMode == TSI || keyboardMode == HTSI || keyboardMode == TSIS) {
                     keyboardContainer.setVisibility(View.VISIBLE);
                     inputString = "";
                     setResultAtListView(inputString);
@@ -328,6 +330,7 @@ public class TaskActivity extends WearableActivity {
             case ITSI:
             case TSI:
             case HTSI:
+            case TSIS:
                 keyBoardView.setBackgroundColor(Color.WHITE);
                 break;
         }
@@ -392,6 +395,7 @@ public class TaskActivity extends WearableActivity {
                                     case ITSI:
                                     case TSI:
                                     case HTSI:
+                                    case TSIS:
                                         inputView.setText(inputString);
                                         if (sourceList.size() != 0 && !inputString.equals("")) {
                                             placeholderTextView.setText(sourceList.get(0));
@@ -437,6 +441,9 @@ public class TaskActivity extends WearableActivity {
                                     case ST:
                                     case TSI:
                                     case HTSI:
+                                        break;
+                                    case TSIS:
+                                        Log.d(TAG, String.valueOf(sourceList.size()));
                                         break;
                                     case LTSI:
                                         if (listSize == 60) {
@@ -539,6 +546,9 @@ public class TaskActivity extends WearableActivity {
             case "HTSI":
                 keyboardMode = HTSI;
                 break;
+            case "TSIS":
+                keyboardMode = TSIS;
+                break;
         }
     }
 
@@ -580,6 +590,9 @@ public class TaskActivity extends WearableActivity {
             case HTSI:
                 keyboardModeString = "HTSI";
                 break;
+            case TSIS:
+                keyboardModeString = "TSIS";
+                break;
         }
         return keyboardModeString;
     }
@@ -604,7 +617,7 @@ public class TaskActivity extends WearableActivity {
             taskEndView.setText(taskEndIndicator);
             listview.setVisibility(View.GONE);
 
-            if (keyboardMode != TSI || keyboardMode != HTSI) {
+            if (keyboardMode != TSI || keyboardMode != HTSI || keyboardMode != TSIS) {
                 RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
                         RelativeLayout.LayoutParams.MATCH_PARENT,
                         RelativeLayout.LayoutParams.MATCH_PARENT
@@ -612,6 +625,8 @@ public class TaskActivity extends WearableActivity {
                 params.setMargins(0, 0, 0, 0);
                 listview.setLayoutParams(params);
                 listview.bringToFront();
+                ViewGroup taskViewGroup = (ViewGroup) findViewById(R.id.task);
+                taskViewGroup.removeView(returnKeyboardView);
             }
             taskEndView.setVisibility(View.VISIBLE);
             taskEndView.bringToFront();
@@ -646,6 +661,7 @@ public class TaskActivity extends WearableActivity {
                 case ITSI:
                 case TSI:
                 case HTSI:
+                case TSIS:
                     placeholderTextView.setBackgroundColor(Color.WHITE);
                     break;
             }
