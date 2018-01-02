@@ -86,6 +86,7 @@ public class TaskActivity extends WearableActivity {
 
     int keyboardMode;
     TextView returnKeyboardView;
+    TextView shadowView;
 
     TextView startView;
     View taskView;
@@ -145,6 +146,8 @@ public class TaskActivity extends WearableActivity {
         keyBoardView = (KeyBoardView) findViewById(R.id.tapboard);
         keyboardContainer = findViewById(R.id.keyboard_container);
 
+        shadowView = (TextView) findViewById(R.id.shadow);
+
         startView = (TextView) findViewById(R.id.start);
         taskView = findViewById(R.id.task);
         errView = (TextView) findViewById(R.id.err);
@@ -156,6 +159,7 @@ public class TaskActivity extends WearableActivity {
         taskEndView.setVisibility(View.GONE);
         startView.setVisibility(View.GONE);
         taskView.setVisibility(View.GONE);
+        shadowView.setVisibility(View.GONE);
 
         initLogger(userNum);
 
@@ -246,9 +250,26 @@ public class TaskActivity extends WearableActivity {
                                 sourceList.indexOf(target)
                         );
                         keyboardContainer.setVisibility(View.VISIBLE);
+                        int height = 0;
+                        if (sourceList.size() >= 7) {
+                            height = keyboardContainer.getHeight();
+                        } else {
+                            height = keyboardContainer.getHeight() / 7 * sourceList.size();
+                        }
+
+                        Log.d(TAG, height + ".");
+
+                        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+                                RelativeLayout.LayoutParams.MATCH_PARENT,
+                                height
+                        );
+                        shadowView.setLayoutParams(layoutParams);
+                        shadowView.setBackgroundColor(Color.parseColor("#4400ff00"));
+                        shadowView.setVisibility(View.VISIBLE);
+                        shadowView.bringToFront();
                         break;
                 }
-                return false;
+                return true;
             });
 
             ViewGroup taskViewGroup = (ViewGroup) findViewById(R.id.task);
@@ -299,6 +320,7 @@ public class TaskActivity extends WearableActivity {
 
                 if (keyboardMode == LTSI || keyboardMode == ITSI || keyboardMode == TSI || keyboardMode == HTSI || keyboardMode == TSIS) {
                     keyboardContainer.setVisibility(View.VISIBLE);
+                    shadowView.setVisibility(View.GONE);
                     inputString = "";
                     setResultAtListView(inputString);
                     inputView.setText(inputString);
@@ -369,6 +391,7 @@ public class TaskActivity extends WearableActivity {
                                     );
                                     if (keyboardMode != HTSI) {
                                         keyboardContainer.setVisibility(View.GONE);
+                                        shadowView.setVisibility(View.GONE);
                                     }
                                 }
                             } else if ((placeholderContainer.getY() <= tempY) && (tempY < keyBoardView.getY())) {
@@ -395,7 +418,31 @@ public class TaskActivity extends WearableActivity {
                                     case ITSI:
                                     case TSI:
                                     case HTSI:
+                                        inputView.setText(inputString);
+                                        if (sourceList.size() != 0 && !inputString.equals("")) {
+                                            placeholderTextView.setText(sourceList.get(0));
+                                        } else {
+                                            placeholderTextView.setText("");
+                                        }
+                                        break;
                                     case TSIS:
+                                        int height = 0;
+                                        if (sourceList.size() >= 7) {
+                                            height = keyboardContainer.getHeight();
+                                        } else {
+                                            height = keyboardContainer.getHeight() / 7 * sourceList.size();
+                                        }
+
+                                        Log.d(TAG, height + ".");
+
+                                        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+                                                RelativeLayout.LayoutParams.MATCH_PARENT,
+                                                height
+                                        );
+                                        shadowView.setLayoutParams(layoutParams);
+                                        shadowView.setBackgroundColor(Color.parseColor("#4400ff00"));
+                                        shadowView.setVisibility(View.VISIBLE);
+                                        shadowView.bringToFront();
                                         inputView.setText(inputString);
                                         if (sourceList.size() != 0 && !inputString.equals("")) {
                                             placeholderTextView.setText(sourceList.get(0));
@@ -444,6 +491,25 @@ public class TaskActivity extends WearableActivity {
                                         break;
                                     case TSIS:
                                         Log.d(TAG, String.valueOf(sourceList.size()));
+                                        runOnUiThread(() -> {
+                                            int height = 0;
+                                            if (sourceList.size() >= 7) {
+                                                height = keyboardContainer.getHeight();
+                                            } else {
+                                                height = keyboardContainer.getHeight() / 7 * sourceList.size();
+                                            }
+
+                                            Log.d(TAG, height + ".");
+
+                                            RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+                                                    RelativeLayout.LayoutParams.MATCH_PARENT,
+                                                    height
+                                            );
+                                            shadowView.setLayoutParams(layoutParams);
+                                            shadowView.setBackgroundColor(Color.parseColor("#4400ff00"));
+                                            shadowView.setVisibility(View.VISIBLE);
+                                            shadowView.bringToFront();
+                                        });
                                         break;
                                     case LTSI:
                                         if (listSize == 60) {
@@ -599,6 +665,8 @@ public class TaskActivity extends WearableActivity {
 
     public void setNextTask() {
 
+        shadowView.setVisibility(View.GONE);
+
         placeholderContainer.removeAllViews();
 
         if (keyboardMode != HTSI) {
@@ -625,8 +693,6 @@ public class TaskActivity extends WearableActivity {
                 params.setMargins(0, 0, 0, 0);
                 listview.setLayoutParams(params);
                 listview.bringToFront();
-                ViewGroup taskViewGroup = (ViewGroup) findViewById(R.id.task);
-                taskViewGroup.removeView(returnKeyboardView);
             }
             taskEndView.setVisibility(View.VISIBLE);
             taskEndView.bringToFront();
