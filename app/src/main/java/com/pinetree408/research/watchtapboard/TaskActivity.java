@@ -122,7 +122,7 @@ public class TaskActivity extends WearableActivity {
 
         listSize = 0;
         trial = 0;
-        trialLimit = 7;
+        trialLimit = 2;
         err = 0;
         taskTrial = 0;
 
@@ -224,7 +224,8 @@ public class TaskActivity extends WearableActivity {
         placeholderAdapter.setClickListener((view, position) -> checkSelectedItem((TextView) view));
         placeholderRecyclerView.setAdapter(placeholderAdapter);
 
-        if (keyboardMode == LTSI || keyboardMode == ITSI || keyboardMode == TSI || keyboardMode == TSIS) {
+        if (keyboardMode == LTSI || keyboardMode == ITSI || keyboardMode == TSI
+                || keyboardMode == TSIS) {
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
                     RelativeLayout.LayoutParams.MATCH_PARENT,
                     RelativeLayout.LayoutParams.MATCH_PARENT

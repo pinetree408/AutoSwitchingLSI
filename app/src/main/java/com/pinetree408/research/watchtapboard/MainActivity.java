@@ -19,6 +19,7 @@ public class MainActivity extends WearableActivity {
 
     static final int REQUEST_CODE_FILE = 1;
 
+    TextView userNumView;
     int userNum;
 
     @Override
@@ -30,12 +31,11 @@ public class MainActivity extends WearableActivity {
         checkFileWritePermission();
 
         userNum = 0;
-
+        userNumView = (TextView) findViewById(R.id.user_number);
         initTaskSettings();
     }
 
     public void initTaskSettings() {
-
         final ViewGroup userSelectorView = (ViewGroup) findViewById(R.id.user_selector);
         for (int i = 0; i < userSelectorView.getChildCount(); i++) {
             userSelectorView.getChildAt(i).setOnTouchListener(this::setUserNumberEventHandler);
@@ -57,15 +57,12 @@ public class MainActivity extends WearableActivity {
         TextView tv = (TextView) v;
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                runOnUiThread(() -> {
-                    if (tv.getText().equals("Up")) {
-                        userNum = userNum + 1;
-                    } else if (tv.getText().equals("Down")) {
-                        userNum = userNum - 1;
-                    }
-                    TextView userNumView = (TextView) findViewById(R.id.user_number);
-                    userNumView.setText(userNum);
-                });
+                if (tv.getText().equals("Up")) {
+                    userNum = userNum + 1;
+                } else if (tv.getText().equals("Down")) {
+                    userNum = userNum - 1;
+                }
+                userNumView.setText(String.valueOf(userNum));
                 break;
         }
         return true;
