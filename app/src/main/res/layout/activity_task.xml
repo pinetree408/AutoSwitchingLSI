@@ -53,11 +53,6 @@
         android:layout_height="match_parent"
         android:id="@+id/task"
         >
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/shadow"
-            />
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -87,7 +82,8 @@
                     android:layout_height="match_parent"
                     android:id="@+id/search"
                     android:textColor="@color/red"
-                    android:gravity="left|center"
+                    android:textAlignment="center"
+                    android:gravity="center"
                     android:paddingLeft="5dp"
                     android:drawableLeft="@drawable/search"
                     android:textStyle="bold"

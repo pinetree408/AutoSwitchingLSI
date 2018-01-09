@@ -22,13 +22,13 @@ import java.util.List;
  */
 public class KeyBoardView extends View {
 
-    char[] keyboardCharList = {
+    public char[] keyboardCharList = {
             'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p',
             'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l',
             'z', 'x', 'c', 'v', 'b', 'n', 'm'
     };
 
-    char[][] keyboardChar = {
+    public char[][] keyboardChar = {
             {'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'},
             {'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'},
             {'z', 'x', 'c', 'v', 'b', 'n', 'm'}

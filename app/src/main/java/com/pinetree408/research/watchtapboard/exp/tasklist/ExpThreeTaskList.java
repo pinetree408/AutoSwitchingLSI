@@ -11,7 +11,7 @@ public class ExpThreeTaskList {
     };
 
     public static String[] p1 = {
-            "person, 240, TSI",
+            "app, 240, TSI",
     };
 
     public static String[] p2 = {
