@@ -23,18 +23,21 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     private LayoutInflater mInflater;
     private ItemClickListener mClickListener;
     private boolean twoLine;
+    private String type;
 
     // data is passed into the constructor
     public MyRecyclerViewAdapter(Context context, List<String> data) {
         this.mInflater = LayoutInflater.from(context);
         this.mData = data;
         this.twoLine = false;
+        this.type = "name";
     }
 
-    public MyRecyclerViewAdapter(Context context, List<String> data, boolean twoLine) {
+    public MyRecyclerViewAdapter(Context context, List<String> data, boolean twoLine, String type) {
         this.mInflater = LayoutInflater.from(context);
         this.mData = data;
         this.twoLine = twoLine;
+        this.type = type;
     }
 
     // inflates the row layout from xml when needed
@@ -50,7 +53,13 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     public void onBindViewHolder(ViewHolder holder, int position) {
         String animal = mData.get(position);
         if (twoLine) {
-            animal = animal.split(" ")[0] + "\n" + animal.split(" ")[1];
+            if (type.equals("person")) {
+                animal = animal.split(" ")[0] + "\n" + animal.split(" ")[1];
+            } else {
+                if (animal.length() > 8) {
+                    animal = animal.substring(0, animal.length() / 2) + "-\n" + animal.substring(animal.length() / 2, animal.length());
+                }
+            }
         }
         holder.myTextView.setText(animal);
         holder.myTextView.setBackgroundResource(R.drawable.border);

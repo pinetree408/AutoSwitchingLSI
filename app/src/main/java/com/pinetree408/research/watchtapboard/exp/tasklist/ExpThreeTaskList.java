@@ -7,78 +7,42 @@ package com.pinetree408.research.watchtapboard.exp.tasklist;
 public class ExpThreeTaskList {
 
     public static String[] p0 = {
-            "person, 240, ST",
+            "app, 240, ISI",
     };
 
     public static String[] p1 = {
-            "app, 240, TSI",
     };
 
     public static String[] p2 = {
-            "person, 240, TSIS",
     };
 
     public static String[] p3 = {
-            "person, 240, HTSI",
     };
 
     public static String[] p4 = {
-            "person, 240, HTSIS",
     };
 
     public static String[] p5 = {
-            "person, 240, ITSI",
     };
 
     public static String[] p6 = {
-            "person, 240, LTSI",
     };
 
     public static String[] p7 = {
-            "person, 240, TSI",
-            "person, 240, LTSI",
-            "person, 240, ITSI",
-            "person, 60, TSI",
-            "person, 60, LTSI",
-            "person, 60, ITSI",};
+    };
 
     public static String[] p8 = {
-            "person, 240, TSI",
-            "person, 240, ITSI",
-            "person, 240, LTSI",
-            "person, 60, TSI",
-            "person, 60, ITSI",
-            "person, 60, LTSI",};
+    };
 
     public static String[] p9 = {
-            "person, 240, LTSI",
-            "person, 240, TSI",
-            "person, 240, ITSI",
-            "person, 60, LTSI",
-            "person, 60, TSI",
-            "person, 60, ITSI",};
+    };
 
     public static String[] p10 = {
-            "person, 240, LTSI",
-            "person, 240, ITSI",
-            "person, 240, TSI",
-            "person, 60, LTSI",
-            "person, 60, ITSI",
-            "person, 60, TSI",};
+    };
 
     public static String[] p11 = {
-            "person, 240, ITSI",
-            "person, 240, TSI",
-            "person, 240, LTSI",
-            "person, 60, ITSI",
-            "person, 60, TSI",
-            "person, 60, LTSI",};
+    };
 
     public static String[] p12 = {
-            "person, 240, ITSI",
-            "person, 240, LTSI",
-            "person, 240, TSI",
-            "person, 60, ITSI",
-            "person, 60, LTSI",
-            "person, 60, TSI",};
+    };
 }
