@@ -56,7 +56,7 @@ public class TaskActivity extends WearableActivity {
 
     static final int REQUEST_CODE_FILE = 1;
 
-    String ip = "143.248.197.27";
+    String ip = "143.248.56.249";
     int port = 5000;
 
     Socket socket;
