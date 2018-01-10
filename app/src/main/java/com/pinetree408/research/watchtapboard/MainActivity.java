@@ -28,7 +28,7 @@ public class MainActivity extends WearableActivity {
         setContentView(R.layout.activity_main);
 
         setAmbientEnabled();
-        checkFileWritePermission();
+        checkPermission();
 
         userNum = 0;
         userNumView = (TextView) findViewById(R.id.user_number);
@@ -80,18 +80,21 @@ public class MainActivity extends WearableActivity {
         }
     }
 
-    public void checkFileWritePermission() {
+    public void checkPermission() {
         if (Build.VERSION.SDK_INT >= 23) {
             if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     != PackageManager.PERMISSION_GRANTED
                     || checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
-                    != PackageManager.PERMISSION_GRANTED) {
+                    != PackageManager.PERMISSION_GRANTED
+                    ) {
                 // Should we show an explanation?
                 if (shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                     // Explain to the user why we need to write the permission.
                     Toast.makeText(this, "Read/Write external storage", Toast.LENGTH_SHORT).show();
                 }
-                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                requestPermissions(new String[]{
+                                Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        },
                         REQUEST_CODE_FILE);
                 // MY_PERMISSION_REQUEST_STORAGE is an
                 // app-defined int constant

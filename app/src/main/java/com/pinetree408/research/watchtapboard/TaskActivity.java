@@ -31,13 +31,21 @@ import com.pinetree408.research.watchtapboard.util.KeyBoardView;
 import com.pinetree408.research.watchtapboard.util.Logger;
 import com.pinetree408.research.watchtapboard.util.Util;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.lang.reflect.Field;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import io.socket.client.IO;
+import io.socket.client.Socket;
+import io.socket.emitter.Emitter;
 
 /**
  * Created by leesangyoon on 2017. 12. 22..
@@ -47,6 +55,11 @@ public class TaskActivity extends WearableActivity {
     private static final String TAG = TaskActivity.class.getSimpleName();
 
     static final int REQUEST_CODE_FILE = 1;
+
+    String ip = "143.248.197.27";
+    int port = 5000;
+
+    Socket socket;
 
     // Gesture Variable
     private int dragThreshold = 30;
@@ -110,11 +123,38 @@ public class TaskActivity extends WearableActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task);
 
+        setAmbientEnabled();
+        checkPermission();
+
+        try {
+            socket = IO.socket("http://" + ip + ":" + port + "/mynamespace");
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
+
+            @Override
+            public void call(Object... args) {
+                Log.d(TAG, "connect");
+            }
+
+        }).on("response", new Emitter.Listener() {
+
+            @Override
+            public void call(Object... args) {
+                Log.d(TAG, "response");
+            }
+
+        }).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
+
+            @Override
+            public void call(Object... args) {}
+
+        });
+        socket.connect();
+
         Intent intent = new Intent(this.getIntent());
         userNum =intent.getIntExtra("userNum", 0);
-
-        setAmbientEnabled();
-        checkFileWritePermission();
 
         jobScheduler = new Timer();
 
@@ -171,6 +211,8 @@ public class TaskActivity extends WearableActivity {
         initListView();
         initKeyboardContainer();
 
+        // Simulation(originSourceList);
+
         targetIndexList = Util.predefineRandom(listSize, trialLimit + 1);
         setNextTask();
     }
@@ -191,9 +233,21 @@ public class TaskActivity extends WearableActivity {
         } else {
             originSourceList = new ArrayList<>(Arrays.asList(Source.app));
         }
+        // Collections.shuffle(originSourceList);
         originSourceList = new ArrayList<>(originSourceList.subList(0, listSize));
         Collections.sort(originSourceList);
         sourceList.addAll(originSourceList);
+    }
+
+    public void setSentence() {
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("data", target);
+            obj.put("type", "Sentence");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        socket.emit("request", obj);
     }
 
     public void initListView() {
@@ -692,7 +746,6 @@ public class TaskActivity extends WearableActivity {
             placeholderContainer.addView(placeholderRecyclerView);
         }
 
-
         if (trial > trialLimit) {
             trial = 0;
             taskTrial = taskTrial + 1;
@@ -723,6 +776,7 @@ public class TaskActivity extends WearableActivity {
             }, 5000);
         } else {
             target = originSourceList.get(targetIndexList[trial]);
+            setSentence();
             String taskStartIndicator = (trial + 1) + "/" + (trialLimit + 1) + "\n" + target;
             if (taskTrial == 0 && trial == 0) {
                 taskStartIndicator = listSize + "-" + sourceType + "-" + changeKeyboardModeType(keyboardMode) + "\n" + taskStartIndicator;
@@ -778,6 +832,28 @@ public class TaskActivity extends WearableActivity {
         }
     }
 
+    public void Simulation(ArrayList<String> sourceList) {
+        for (String target : sourceList) {
+            String result = target;
+            for (int i = 0; i < target.length(); i++) {
+                String start = target.substring(0, i);
+                ArrayList<String> tempList = new ArrayList<>();
+                ArrayList<String> correctionSet = getCorrectionSet(start);
+                for (String temp: sourceList) {
+                    for (String corrected : correctionSet) {
+                        if (temp.startsWith(corrected)) {
+                            if (!tempList.contains(temp)) {
+                                tempList.add(temp);
+                            }
+                        }
+                    }
+                }
+                result = result + "-" + tempList.size();
+            }
+            Log.d(TAG, result);
+        }
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
@@ -790,18 +866,21 @@ public class TaskActivity extends WearableActivity {
         }
     }
 
-    public void checkFileWritePermission() {
+    public void checkPermission() {
         if (Build.VERSION.SDK_INT >= 23) {
             if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     != PackageManager.PERMISSION_GRANTED
                     || checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
-                    != PackageManager.PERMISSION_GRANTED) {
+                    != PackageManager.PERMISSION_GRANTED
+                    ) {
                 // Should we show an explanation?
                 if (shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                     // Explain to the user why we need to write the permission.
                     Toast.makeText(this, "Read/Write external storage", Toast.LENGTH_SHORT).show();
                 }
-                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                requestPermissions(new String[]{
+                                Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE
+                        },
                         REQUEST_CODE_FILE);
                 // MY_PERMISSION_REQUEST_STORAGE is an
                 // app-defined int constant
