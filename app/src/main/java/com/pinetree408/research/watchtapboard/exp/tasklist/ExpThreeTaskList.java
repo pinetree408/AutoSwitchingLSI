@@ -7,7 +7,15 @@ package com.pinetree408.research.watchtapboard.exp.tasklist;
 public class ExpThreeTaskList {
 
     public static String[] p0 = {
-            "person, 240, ILSI",
+            "person, 240, LSI",
+            "person, 240, LI",
+            "person, 240, ISI",
+            "person, 60, LSI",
+            "person, 60, LI",
+            "person, 60, ISI",
+            "person, 15, LSI",
+            "person, 15, LI",
+            "person, 15, ISI",
     };
 
     public static String[] p1 = {

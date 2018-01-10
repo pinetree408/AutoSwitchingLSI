@@ -160,7 +160,7 @@ public class TaskActivity extends WearableActivity {
 
         listSize = 0;
         trial = 0;
-        trialLimit = 2;
+        trialLimit = 7;
         err = 0;
         taskTrial = 0;
 
@@ -233,8 +233,7 @@ public class TaskActivity extends WearableActivity {
         } else {
             originSourceList = new ArrayList<>(Arrays.asList(Source.app));
         }
-        // Collections.shuffle(originSourceList);
-        originSourceList = new ArrayList<>(originSourceList.subList(0, listSize));
+        originSourceList = new ArrayList<>(originSourceList.subList(listSize, listSize * 2));
         Collections.sort(originSourceList);
         sourceList.addAll(originSourceList);
     }

@@ -6,7 +6,7 @@ package com.pinetree408.research.watchtapboard.util;
 
 public class Util {
 
-    public static int[] predefineRandom(int n, int size){
+    public static int[] predefineUniformRandom(int n, int size){
         double goalMean = n/2.0;
 
         int[] ret = new int[size];
@@ -33,6 +33,20 @@ public class Util {
                 return ret;
             }
         }
+    }
+
+    public static int[] predefineRandom(int n, int size){
+
+        int[] ret = new int[size];
+        int currSize = 0;
+        while (currSize < size){
+            int temp = StdRandom.uniform(n);
+            if (!intContains(ret, temp)){
+                ret[currSize++] = temp;
+            }
+        }
+
+        return ret;
     }
 
     static boolean intContains(int[] A, int B) {
