@@ -233,7 +233,11 @@ public class TaskActivity extends WearableActivity {
         } else {
             originSourceList = new ArrayList<>(Arrays.asList(Source.app));
         }
-        originSourceList = new ArrayList<>(originSourceList.subList(listSize, listSize * 2));
+        if (sourceType.equals("person")) {
+            originSourceList = new ArrayList<>(originSourceList.subList(listSize, listSize * 2));
+        } else {
+            originSourceList = new ArrayList<>(originSourceList.subList(0, listSize));
+        }
         Collections.sort(originSourceList);
         sourceList.addAll(originSourceList);
     }
@@ -276,20 +280,18 @@ public class TaskActivity extends WearableActivity {
 
         if (keyboardMode == LALSI || keyboardMode == IALSI || keyboardMode == LSI || keyboardMode == ILSI) {
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
-                    RelativeLayout.LayoutParams.MATCH_PARENT,
-                    RelativeLayout.LayoutParams.MATCH_PARENT
+                    80,
+                    44
             );
-            params.setMargins(0, 44, 0, 0);
-            listview.setLayoutParams(params);
+            params.setMargins(240, 0, 0, 0);
 
             returnKeyboardView = new TextView(this);
             returnKeyboardView.setHeight(44);
             returnKeyboardView.setMinimumHeight(44);
-            returnKeyboardView.setWidth(320);
-            returnKeyboardView.setMinimumWidth(320);
+            returnKeyboardView.setWidth(80);
+            returnKeyboardView.setMinimumWidth(80);
             returnKeyboardView.setTextColor(Color.parseColor("#00FF00"));
             returnKeyboardView.setCompoundDrawablesRelativeWithIntrinsicBounds(0, R.drawable.search, 0, 0);
-            returnKeyboardView.setBackgroundColor(Color.WHITE);
             returnKeyboardView.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
 
             returnKeyboardView.setOnTouchListener((v, event) -> {
@@ -314,7 +316,8 @@ public class TaskActivity extends WearableActivity {
             });
 
             ViewGroup taskViewGroup = (ViewGroup) findViewById(R.id.task);
-            taskViewGroup.addView(returnKeyboardView, 1);
+            taskViewGroup.addView(returnKeyboardView, 1, params);
+            returnKeyboardView.bringToFront();
         }
     }
 
@@ -741,8 +744,10 @@ public class TaskActivity extends WearableActivity {
 
         if (keyboardMode != ISI) {
             placeholderContainer.addView(placeholderTextView);
+            searchView.setVisibility(View.VISIBLE);
         } else {
             placeholderContainer.addView(placeholderRecyclerView);
+            searchView.setVisibility(View.INVISIBLE);
         }
 
         if (trial > trialLimit) {
@@ -834,19 +839,47 @@ public class TaskActivity extends WearableActivity {
     public void Simulation(ArrayList<String> sourceList) {
         for (String target : sourceList) {
             String result = target;
-            for (int i = 0; i < target.length(); i++) {
-                String start = target.substring(0, i);
+            String startName = target.split(" ")[0];
+            String endName = target.split(" ")[1];
+
+            int nameLength;
+            if (startName.length() >= endName.length()) {
+                nameLength = startName.length();
+            } else {
+                nameLength = endName.length();
+            }
+
+            for (int i = 0; i < nameLength; i++) {
                 ArrayList<String> tempList = new ArrayList<>();
-                ArrayList<String> correctionSet = getCorrectionSet(start);
-                for (String temp: sourceList) {
-                    for (String corrected : correctionSet) {
-                        if (temp.startsWith(corrected)) {
-                            if (!tempList.contains(temp)) {
-                                tempList.add(temp);
+
+                if (i < startName.length()) {
+                    String tempName = startName.substring(0, i);
+                    ArrayList<String> correctionStartNameSet = getCorrectionSet(tempName);
+                    for (String temp: sourceList) {
+                        for (String corrected : correctionStartNameSet) {
+                            if (temp.split(" ")[0].startsWith(corrected) || temp.split(" ")[1].startsWith(corrected)) {
+                                if (!tempList.contains(temp)) {
+                                    tempList.add(temp);
+                                }
                             }
                         }
                     }
                 }
+
+                if (i < endName.length()) {
+                    String tempName = endName.substring(0, i);
+                    ArrayList<String> correctionEndNameSet = getCorrectionSet(tempName);
+                    for (String temp: sourceList) {
+                        for (String corrected : correctionEndNameSet) {
+                            if (temp.split(" ")[0].startsWith(corrected) || temp.split(" ")[1].startsWith(corrected)) {
+                                if (!tempList.contains(temp)) {
+                                    tempList.add(temp);
+                                }
+                            }
+                        }
+                    }
+                }
+
                 result = result + "-" + tempList.size();
             }
             Log.d(TAG, result);
