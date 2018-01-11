@@ -23,24 +23,12 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     private List<String> mData = Collections.emptyList();
     private LayoutInflater mInflater;
     private ItemClickListener mClickListener;
-    private boolean twoLine;
-    private String type;
     private String inputString;
 
     // data is passed into the constructor
     public MyRecyclerViewAdapter(Context context, List<String> data) {
         this.mInflater = LayoutInflater.from(context);
         this.mData = data;
-        this.twoLine = false;
-        this.type = "name";
-        this.inputString = "";
-    }
-
-    public MyRecyclerViewAdapter(Context context, List<String> data, boolean twoLine, String type) {
-        this.mInflater = LayoutInflater.from(context);
-        this.mData = data;
-        this.twoLine = twoLine;
-        this.type = type;
         this.inputString = "";
     }
 
@@ -63,25 +51,10 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
             } else if (animal.split(" ")[1].startsWith(inputString)) {
                 animal = animal.split(" ")[0] + " <b>" + inputString + "</b>" + animal.split(" ")[1].substring(inputString.length(), animal.split(" ")[1].length());
             }
-        }
-
-        if (twoLine) {
-            if (type.equals("person")) {
-                if (inputString.length() > 0) {
-                    animal = animal.split(" ")[0] + "<br>" + animal.split(" ")[1];
-                } else {
-                    animal = animal.split(" ")[0] + "\n" + animal.split(" ")[1];
-                }
-            } else {
-                if (animal.length() > 8) {
-                    animal = animal.substring(0, animal.length() / 2) + "-\n" + animal.substring(animal.length() / 2, animal.length());
-                }
-            }
-        }
-
-        if (inputString.length() > 0 ){
+            animal = animal.split(" ")[0] + "<br>" + animal.split(" ")[1];
             holder.myTextView.setText(Html.fromHtml(animal));
         } else {
+            animal = animal.split(" ")[0] + "\n" + animal.split(" ")[1];
             holder.myTextView.setText(animal);
         }
 
