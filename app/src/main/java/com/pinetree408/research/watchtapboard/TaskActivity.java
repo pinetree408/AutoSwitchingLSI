@@ -47,10 +47,6 @@ import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
 
-/**
- * Created by leesangyoon on 2017. 12. 22..
- */
-
 public class TaskActivity extends WearableActivity {
     private static final String TAG = TaskActivity.class.getSimpleName();
 
@@ -108,8 +104,6 @@ public class TaskActivity extends WearableActivity {
     int userNum;
     int trial;
     int trialLimit;
-    int err;
-    TextView errView;
     TextView successView;
     TextView taskEndView;
     long startTime;
@@ -161,7 +155,6 @@ public class TaskActivity extends WearableActivity {
         listSize = 0;
         trial = 0;
         trialLimit = 7;
-        err = 0;
         taskTrial = 0;
 
         listview = (ListView) findViewById(R.id.list_view);
@@ -188,12 +181,10 @@ public class TaskActivity extends WearableActivity {
 
         startView = (TextView) findViewById(R.id.start);
         taskView = findViewById(R.id.task);
-        errView = (TextView) findViewById(R.id.err);
         successView = (TextView) findViewById(R.id.success);
         taskEndView = (TextView) findViewById(R.id.task_end);
 
         // Init
-        errView.setVisibility(View.GONE);
         taskEndView.setVisibility(View.GONE);
         startView.setVisibility(View.GONE);
         taskView.setVisibility(View.GONE);
@@ -210,8 +201,6 @@ public class TaskActivity extends WearableActivity {
         initSourceList();
         initListView();
         initKeyboardContainer();
-
-        // Simulation(originSourceList);
 
         targetIndexList = Util.predefineRandom(listSize, trialLimit + 1);
         setNextTask();
@@ -260,6 +249,17 @@ public class TaskActivity extends WearableActivity {
             public View getView(int position, View convertView, @NonNull ViewGroup parent) {
                 View view = super.getView(position, convertView, parent);
                 view.setBackgroundColor(Color.WHITE);
+                TextView tempView = (TextView) view;
+                String tempString = tempView.getText().toString();
+                if (inputString.length() > 0) {
+                    if (tempString.split(" ")[0].startsWith(inputString)) {
+                        String sourceString = "<b>" + inputString + "</b>" + tempString.substring(inputString.length(), tempString.length());
+                        tempView.setText(Html.fromHtml(sourceString));
+                    } else if (tempString.split(" ")[1].startsWith(inputString)) {
+                        String sourceString = tempString.split(" ")[0] + " <b>" + inputString + "</b>" + tempString.split(" ")[1].substring(inputString.length(), tempString.split(" ")[1].length());
+                        tempView.setText(Html.fromHtml(sourceString));
+                    }
+                }
                 return view;
             }
         };
@@ -360,38 +360,8 @@ public class TaskActivity extends WearableActivity {
                     listview.getAdapter().getCount(),
                     sourceList.indexOf(target)
             );
-            startTime = System.currentTimeMillis();
-            listview.setSelectionAfterHeaderView();
-            placeholderRecyclerView.getLayoutManager().scrollToPosition(0);
-
-            err = err + 1;
-            String styledText = target + "<br/><font color='red'>" + err + "/5</font>";
-            errView.setText(Html.fromHtml(styledText));
-            taskView.setVisibility(View.GONE);
-            errView.setVisibility(View.VISIBLE);
-
-            new Handler().postDelayed(() -> {
-                taskView.setVisibility(View.VISIBLE);
-
-                if (keyboardMode == LALSI || keyboardMode == IALSI || keyboardMode == LSI
-                        || keyboardMode == ILSI || keyboardMode == ISI) {
-                    keyboardContainer.setVisibility(View.VISIBLE);
-                    inputString = "";
-                    setResultAtListView(inputString);
-                    inputView.setText(inputString);
-                    if (sourceList.size() != 0 && !inputString.equals("")) {
-                        placeholderTextView.setText(sourceList.get(0));
-                    } else {
-                        placeholderTextView.setText("");
-                    }
-                }
-
-                errView.setVisibility(View.GONE);
-                if (err > 4) {
-                    err = 0;
-                    setNextTask();
-                }
-            }, 1000);
+            selectedView.setBackgroundColor(Color.parseColor("#ff0F00"));
+            new Handler().postDelayed(() -> selectedView.setBackgroundColor(Color.WHITE), 1000);
         }
     }
 
@@ -474,7 +444,16 @@ public class TaskActivity extends WearableActivity {
                                     case ISI:
                                         inputView.setText(inputString);
                                         if (sourceList.size() != 0 && !inputString.equals("")) {
-                                            placeholderTextView.setText(sourceList.get(0));
+                                            String tempString = sourceList.get(0);
+                                            if (tempString.split(" ")[0].startsWith(inputString)) {
+                                                String sourceString = "<b>" + inputString + "</b>" + tempString.substring(inputString.length(), tempString.length());
+                                                placeholderTextView.setText(Html.fromHtml(sourceString));
+                                            } else if (tempString.split(" ")[1].startsWith(inputString)) {
+                                                String sourceString = tempString.split(" ")[0] + " <b>" + inputString + "</b>" + tempString.split(" ")[1].substring(inputString.length(), tempString.split(" ")[1].length());
+                                                placeholderTextView.setText(Html.fromHtml(sourceString));
+                                            } else {
+                                                placeholderTextView.setText(sourceList.get(0));
+                                            }
                                         } else {
                                             placeholderTextView.setText("");
                                         }
@@ -484,7 +463,16 @@ public class TaskActivity extends WearableActivity {
 
                                         inputView.setText(inputString);
                                         if (sourceList.size() != 0 && !inputString.equals("")) {
-                                            placeholderTextView.setText(sourceList.get(0));
+                                            String tempString = sourceList.get(0);
+                                            if (tempString.split(" ")[0].startsWith(inputString)) {
+                                                String sourceString = "<b>" + inputString + "</b>" + tempString.substring(inputString.length(), tempString.length());
+                                                placeholderTextView.setText(Html.fromHtml(sourceString));
+                                            } else if (tempString.split(" ")[1].startsWith(inputString)) {
+                                                String sourceString = tempString.split(" ")[0] + " <b>" + inputString + "</b>" + tempString.split(" ")[1].substring(inputString.length(), tempString.split(" ")[1].length());
+                                                placeholderTextView.setText(Html.fromHtml(sourceString));
+                                            } else {
+                                                placeholderTextView.setText(sourceList.get(0));
+                                            }
                                         } else {
                                             placeholderTextView.setText("");
                                         }
@@ -518,7 +506,16 @@ public class TaskActivity extends WearableActivity {
                                 int convertSize = 0;
                                 inputView.setText(inputString);
                                 if (sourceList.size() != 0) {
-                                    placeholderTextView.setText(sourceList.get(0));
+                                    String tempString = sourceList.get(0);
+                                    if (tempString.split(" ")[0].startsWith(inputString)) {
+                                        String sourceString = "<b>" + inputString + "</b>" + tempString.substring(inputString.length(), tempString.length());
+                                        placeholderTextView.setText(Html.fromHtml(sourceString));
+                                    } else if (tempString.split(" ")[1].startsWith(inputString)) {
+                                        String sourceString = tempString.split(" ")[0] + " <b>" + inputString + "</b>" + tempString.split(" ")[1].substring(inputString.length(), tempString.split(" ")[1].length());
+                                        placeholderTextView.setText(Html.fromHtml(sourceString));
+                                    } else {
+                                        placeholderTextView.setText(sourceList.get(0));
+                                    }
                                 } else {
                                     placeholderTextView.setText("");
                                 }
@@ -580,15 +577,30 @@ public class TaskActivity extends WearableActivity {
 
     public void setResultAtListView(String inputString) {
         sourceList.clear();
-        ArrayList<String> correctionSet = getCorrectionSet(inputString);
 
         if (inputString.equals("")) {
             sourceList.addAll(originSourceList);
         } else {
             ArrayList<String> tempList = new ArrayList<>();
             for (String item : originSourceList) {
+                if (item.replace(" ", "").startsWith(inputString)) {
+                    if (!tempList.contains(item)) {
+                        tempList.add(item);
+                    }
+                }
+            }
+            for (String item : originSourceList) {
+                if (item.split(" ")[1].startsWith(inputString)) {
+                    if (!tempList.contains(item)) {
+                        tempList.add(item);
+                    }
+                }
+            }
+            ArrayList<String> correctionSet = getCorrectionSet(inputString);
+            for (String item : originSourceList) {
                 for (String corrected : correctionSet) {
-                    if (item.replace(" ", "").startsWith(corrected)) {
+                    if (item.replace(" ", "").startsWith(corrected)
+                            || item.split(" ")[1].startsWith(corrected)) {
                         if (!tempList.contains(item)) {
                             tempList.add(item);
                         }
@@ -600,6 +612,7 @@ public class TaskActivity extends WearableActivity {
         adapter.notifyDataSetChanged();
         listview.setSelectionAfterHeaderView();
 
+        placeholderAdapter.setInputString(inputString);
         placeholderAdapter.notifyDataSetChanged();
         placeholderRecyclerView.getLayoutManager().scrollToPosition(0);
     }
@@ -608,7 +621,7 @@ public class TaskActivity extends WearableActivity {
         ArrayList<String> correctionSet = new ArrayList<>();
         ArrayList<ArrayList<Character>> charSet = new ArrayList<>();
         for (int i = 0; i < inputString.length(); i++) {
-            charSet.add(getCloseChar(inputString.charAt(i)));
+            charSet.add(getCloseCharFromKeyboard(inputString.charAt(i)));
         }
 
         for (int i = 0; i < charSet.size(); i++) {
@@ -619,19 +632,27 @@ public class TaskActivity extends WearableActivity {
             }
         }
 
+        Collections.sort(correctionSet);
+
         return correctionSet;
     }
 
-    public ArrayList<Character> getCloseChar(char character) {
+    public ArrayList<Character> getCloseCharFromKeyboard(char character) {
         ArrayList<Character> closeSet = new ArrayList<>();
         int row_pos = -1;
-        int col_pos = -1;
+        double col_pos = -1;
         for (int i = 0; i < keyBoardView.keyboardChar.length; i++) {
             char[] row = keyBoardView.keyboardChar[i];
             for (int j = 0; j < row.length; j++) {
                 if (row[j] == character) {
                     row_pos = i;
-                    col_pos = j;
+                    if (row_pos == 0) {
+                        col_pos = j;
+                    } else if (row_pos == 1) {
+                        col_pos = j + 0.5;
+                    } else if (row_pos == 2) {
+                        col_pos = j + 1.0;
+                    }
                     break;
                 }
             }
@@ -640,9 +661,33 @@ public class TaskActivity extends WearableActivity {
         for (int i = 0; i < keyBoardView.keyboardChar.length; i++) {
             char[] row = keyBoardView.keyboardChar[i];
             for (int j = 0; j < row.length; j++) {
-                if (i == row_pos - 1 || i == row_pos || i == row_pos + 1) {
-                    if (j == col_pos - 1 || j == col_pos || j == col_pos + 1) {
+                if (i == row_pos - 1) {
+                    if (j == (int) (col_pos + 0.5) || j == (int) (col_pos - 0.5)){
                         closeSet.add(row[j]);
+                    }
+                } else if (i == row_pos) {
+                    if (i == 0) {
+                        if (j == (int) (col_pos - 1) || j == (int) (col_pos + 1)){
+                            closeSet.add(row[j]);
+                        }
+                    } else if (i == 1){
+                        if (j == (int) (col_pos - 1.5) || j == (int) (col_pos + 0.5)){
+                            closeSet.add(row[j]);
+                        }
+                    } else if (i == 2) {
+                        if (j == (int) (col_pos - 2) || j == (int) col_pos){
+                            closeSet.add(row[j]);
+                        }
+                    }
+                } else if (i == row_pos + 1) {
+                    if (i == 1) {
+                        if (j == (int) (col_pos) || j == (int) (col_pos - 1)){
+                            closeSet.add(row[j]);
+                        }
+                    } else if (i == 2){
+                        if (j == (int) (col_pos - 0.5) || j == (int) (col_pos - 1.5)){
+                            closeSet.add(row[j]);
+                        }
                     }
                 }
             }
@@ -755,7 +800,8 @@ public class TaskActivity extends WearableActivity {
             taskTrial = taskTrial + 1;
             setTaskList(userNum);
             targetIndexList = Util.predefineRandom(listSize, trialLimit + 1);
-            String taskEndIndicator = listSize + "-" + sourceType + "-" + changeKeyboardModeType(keyboardMode);
+            // String taskEndIndicator = listSize + "-" + sourceType + "-" + changeKeyboardModeType(keyboardMode);
+            String taskEndIndicator = listSize + "-" + changeKeyboardModeType(keyboardMode);
             taskEndView.setText(taskEndIndicator);
             listview.setVisibility(View.GONE);
 
@@ -783,14 +829,14 @@ public class TaskActivity extends WearableActivity {
             setSentence();
             String taskStartIndicator = (trial + 1) + "/" + (trialLimit + 1) + "\n" + target;
             if (taskTrial == 0 && trial == 0) {
-                taskStartIndicator = listSize + "-" + sourceType + "-" + changeKeyboardModeType(keyboardMode) + "\n" + taskStartIndicator;
+                // taskStartIndicator = listSize + "-" + sourceType + "-" + changeKeyboardModeType(keyboardMode) + "\n" + taskStartIndicator;
+                taskStartIndicator = listSize + "-" + changeKeyboardModeType(keyboardMode) + "\n" + taskStartIndicator;
             }
             startView.setText(taskStartIndicator);
             startView.setVisibility(View.VISIBLE);
             startView.setOnTouchListener(null);
             taskView.setVisibility(View.GONE);
             inputString = "";
-            err = 0;
             inputView.setText(inputString);
             placeholderTextView.setText(inputString);
             setResultAtListView(inputString);
@@ -833,56 +879,6 @@ public class TaskActivity extends WearableActivity {
                         }
                     },
                     2000);
-        }
-    }
-
-    public void Simulation(ArrayList<String> sourceList) {
-        for (String target : sourceList) {
-            String result = target;
-            String startName = target.split(" ")[0];
-            String endName = target.split(" ")[1];
-
-            int nameLength;
-            if (startName.length() >= endName.length()) {
-                nameLength = startName.length();
-            } else {
-                nameLength = endName.length();
-            }
-
-            for (int i = 0; i < nameLength; i++) {
-                ArrayList<String> tempList = new ArrayList<>();
-
-                if (i < startName.length()) {
-                    String tempName = startName.substring(0, i);
-                    ArrayList<String> correctionStartNameSet = getCorrectionSet(tempName);
-                    for (String temp: sourceList) {
-                        for (String corrected : correctionStartNameSet) {
-                            if (temp.split(" ")[0].startsWith(corrected) || temp.split(" ")[1].startsWith(corrected)) {
-                                if (!tempList.contains(temp)) {
-                                    tempList.add(temp);
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (i < endName.length()) {
-                    String tempName = endName.substring(0, i);
-                    ArrayList<String> correctionEndNameSet = getCorrectionSet(tempName);
-                    for (String temp: sourceList) {
-                        for (String corrected : correctionEndNameSet) {
-                            if (temp.split(" ")[0].startsWith(corrected) || temp.split(" ")[1].startsWith(corrected)) {
-                                if (!tempList.contains(temp)) {
-                                    tempList.add(temp);
-                                }
-                            }
-                        }
-                    }
-                }
-
-                result = result + "-" + tempList.size();
-            }
-            Log.d(TAG, result);
         }
     }
 

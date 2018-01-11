@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +25,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     private ItemClickListener mClickListener;
     private boolean twoLine;
     private String type;
+    private String inputString;
 
     // data is passed into the constructor
     public MyRecyclerViewAdapter(Context context, List<String> data) {
@@ -31,6 +33,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
         this.mData = data;
         this.twoLine = false;
         this.type = "name";
+        this.inputString = "";
     }
 
     public MyRecyclerViewAdapter(Context context, List<String> data, boolean twoLine, String type) {
@@ -38,6 +41,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
         this.mData = data;
         this.twoLine = twoLine;
         this.type = type;
+        this.inputString = "";
     }
 
     // inflates the row layout from xml when needed
@@ -52,16 +56,35 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         String animal = mData.get(position);
+
+        if (inputString.length() > 0) {
+            if (animal.split(" ")[0].startsWith(inputString)) {
+                animal = "<b>" + inputString + "</b>" + animal.substring(inputString.length(), animal.length());
+            } else if (animal.split(" ")[1].startsWith(inputString)) {
+                animal = animal.split(" ")[0] + " <b>" + inputString + "</b>" + animal.split(" ")[1].substring(inputString.length(), animal.split(" ")[1].length());
+            }
+        }
+
         if (twoLine) {
             if (type.equals("person")) {
-                animal = animal.split(" ")[0] + "\n" + animal.split(" ")[1];
+                if (inputString.length() > 0) {
+                    animal = animal.split(" ")[0] + "<br>" + animal.split(" ")[1];
+                } else {
+                    animal = animal.split(" ")[0] + "\n" + animal.split(" ")[1];
+                }
             } else {
                 if (animal.length() > 8) {
                     animal = animal.substring(0, animal.length() / 2) + "-\n" + animal.substring(animal.length() / 2, animal.length());
                 }
             }
         }
-        holder.myTextView.setText(animal);
+
+        if (inputString.length() > 0 ){
+            holder.myTextView.setText(Html.fromHtml(animal));
+        } else {
+            holder.myTextView.setText(animal);
+        }
+
         holder.myTextView.setBackgroundResource(R.drawable.border);
     }
 
@@ -103,5 +126,9 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     // parent activity will implement this method to respond to click events
     public interface ItemClickListener {
         void onItemClick(View view, int position);
+    }
+
+    public void setInputString(String inputString) {
+        this.inputString = inputString;
     }
 }
