@@ -23,6 +23,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/success"
+        android:clickable="false"
         />
 
     <TextView
@@ -34,6 +35,7 @@
         android:background="@color/green"
         android:textColor="@color/black"
         android:id="@+id/task_end"
+        android:clickable="false"
         />
 
     <!-- Task Layout -->

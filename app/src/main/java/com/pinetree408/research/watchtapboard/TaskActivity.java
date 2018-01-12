@@ -89,9 +89,6 @@ public class TaskActivity extends WearableActivity {
     static final int LI = 0;
     static final int LSI = 1;
     static final int ISI = 2;
-    static final int ILSI = 3;
-    static final int LALSI = 4;
-    static final int IALSI = 5;
 
     int keyboardMode;
     TextView returnKeyboardView;
@@ -104,13 +101,14 @@ public class TaskActivity extends WearableActivity {
     int userNum;
     int trial;
     int trialLimit;
-    TextView successView;
     TextView taskEndView;
     long startTime;
     String sourceType;
     int taskTrial;
     Logger logger;
-    long autoToListTime;
+
+    boolean isSuccess;
+    boolean isTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,26 +123,10 @@ public class TaskActivity extends WearableActivity {
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
-        socket.on(Socket.EVENT_CONNECT, new Emitter.Listener() {
 
-            @Override
-            public void call(Object... args) {
-                Log.d(TAG, "connect");
-            }
-
-        }).on("response", new Emitter.Listener() {
-
-            @Override
-            public void call(Object... args) {
-                Log.d(TAG, "response");
-            }
-
-        }).on(Socket.EVENT_DISCONNECT, new Emitter.Listener() {
-
-            @Override
-            public void call(Object... args) {}
-
-        });
+        socket.on(Socket.EVENT_CONNECT, (Object... args) -> Log.d(TAG, "connect")
+        ).on("response",  (Object... args) -> Log.d(TAG, "response")
+        ).on(Socket.EVENT_DISCONNECT, (Object... args) -> {});
         socket.connect();
 
         Intent intent = new Intent(this.getIntent());
@@ -157,40 +139,32 @@ public class TaskActivity extends WearableActivity {
         trialLimit = 7;
         taskTrial = 0;
 
+        isSuccess = false;
+        isTask = false;
+
+        // list Interface
         listview = (ListView) findViewById(R.id.list_view);
+
+        // Search Interface
+        keyboardContainer = findViewById(R.id.keyboard_container);
         inputView = (TextView) findViewById(R.id.input);
         searchView = (TextView) findViewById(R.id.search);
-        placeholderContainer = (LinearLayout) findViewById(R.id.place_holder);
-
-        // place holder init
-        placeholderTextView = new TextView(this);
-        placeholderTextView.setHeight(64);
-        placeholderTextView.setMinimumHeight(64);
-        placeholderTextView.setWidth(320);
-        placeholderTextView.setMinimumWidth(320);
-        placeholderTextView.setTextColor(Color.GREEN);
-        placeholderTextView.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
-
-        placeholderRecyclerView = new RecyclerView(this);
-        placeholderRecyclerView.setMinimumHeight(64);
-        placeholderRecyclerView.setMinimumWidth(320);
-        placeholderRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-
-        keyBoardView = (KeyBoardView) findViewById(R.id.tapboard);
-        keyboardContainer = findViewById(R.id.keyboard_container);
 
         returnKeyboardView = new TextView(this);
+        placeholderContainer = (LinearLayout) findViewById(R.id.place_holder);
+        placeholderTextView = new TextView(this);
+        placeholderRecyclerView = new RecyclerView(this);
+        setupDynamicView();
 
+        keyBoardView = (KeyBoardView) findViewById(R.id.tapboard);
+
+        // Task Interface
         startView = (TextView) findViewById(R.id.start);
         taskView = findViewById(R.id.task);
-        successView = (TextView) findViewById(R.id.success);
         taskEndView = (TextView) findViewById(R.id.task_end);
 
         // Init
-        startView.setVisibility(View.GONE);
-        taskView.setVisibility(View.GONE);
         taskEndView.setVisibility(View.GONE);
-        searchView.setText("");
 
         setupLogger(userNum);
 
@@ -242,7 +216,7 @@ public class TaskActivity extends WearableActivity {
         };
         listview.setAdapter(adapter);
         listview.setOnItemClickListener((parent, view, position, id) -> {
-            if ((System.currentTimeMillis() - autoToListTime) >= 500) {
+            if ((System.currentTimeMillis() - startTime) >= 200) {
                 checkSelectedItem((TextView) view);
             }
         });
@@ -254,6 +228,11 @@ public class TaskActivity extends WearableActivity {
 
     public void setupKeyboardContainer() {
         keyboardContainer.setOnTouchListener((v, event) -> {
+
+            if (!isTask) {
+                return true;
+            }
+
             int tempX = (int) event.getAxisValue(MotionEvent.AXIS_X);
             int tempY = (int) event.getAxisValue(MotionEvent.AXIS_Y);
             long eventTime = System.currentTimeMillis();
@@ -310,29 +289,8 @@ public class TaskActivity extends WearableActivity {
                                 switch (keyboardMode) {
                                     case LI:
                                         break;
-                                    case LALSI:
-                                    case IALSI:
                                     case LSI:
                                     case ISI:
-                                        inputView.setText(inputString);
-                                        if (sourceList.size() != 0 && !inputString.equals("")) {
-                                            String tempString = sourceList.get(0);
-                                            if (tempString.split(" ")[0].startsWith(inputString)) {
-                                                String sourceString = "<b>" + inputString + "</b>" + tempString.substring(inputString.length(), tempString.length());
-                                                placeholderTextView.setText(Html.fromHtml(sourceString));
-                                            } else if (tempString.split(" ")[1].startsWith(inputString)) {
-                                                String sourceString = tempString.split(" ")[0] + " <b>" + inputString + "</b>" + tempString.split(" ")[1].substring(inputString.length(), tempString.split(" ")[1].length());
-                                                placeholderTextView.setText(Html.fromHtml(sourceString));
-                                            } else {
-                                                placeholderTextView.setText(sourceList.get(0));
-                                            }
-                                        } else {
-                                            placeholderTextView.setText("");
-                                        }
-                                        break;
-                                    case ILSI:
-                                        searchView.setText(String.valueOf(sourceList.size()));
-
                                         inputView.setText(inputString);
                                         if (sourceList.size() != 0 && !inputString.equals("")) {
                                             String tempString = sourceList.get(0);
@@ -375,7 +333,6 @@ public class TaskActivity extends WearableActivity {
                                         listview.getAdapter().getCount(),
                                         sourceList.indexOf(target)
                                 );
-                                int convertSize = 0;
                                 inputView.setText(inputString);
                                 if (sourceList.size() != 0) {
                                     String tempString = sourceList.get(0);
@@ -390,52 +347,6 @@ public class TaskActivity extends WearableActivity {
                                     }
                                 } else {
                                     placeholderTextView.setText("");
-                                }
-
-                                switch (keyboardMode) {
-                                    case LI:
-                                    case LSI:
-                                    case ISI:
-                                        break;
-                                    case ILSI:
-                                        searchView.setText(String.valueOf(sourceList.size()));
-                                        break;
-                                    case LALSI:
-                                        if (listSize == 60) {
-                                            convertSize = 4;
-                                        } else if (listSize == 240) {
-                                            convertSize = 9;
-                                        }
-                                        if (sourceList.size() <= convertSize && sourceList.size() != 0) {
-                                            autoToListTime = System.currentTimeMillis();
-                                            logger.fileWriteLog(
-                                                    taskTrial,
-                                                    trial,
-                                                    (System.currentTimeMillis() - startTime),
-                                                    target,
-                                                    "auto-switch",
-                                                    listview.getAdapter().getCount(),
-                                                    sourceList.indexOf(target)
-                                            );
-                                            keyboardContainer.setVisibility(View.GONE);
-                                        }
-                                        break;
-                                    case IALSI:
-                                        convertSize = 2;
-                                        if (inputString.length() >= convertSize && sourceList.size() != 0) {
-                                            autoToListTime = System.currentTimeMillis();
-                                            logger.fileWriteLog(
-                                                    taskTrial,
-                                                    trial,
-                                                    (System.currentTimeMillis() - startTime),
-                                                    target,
-                                                    "auto-switch",
-                                                    listview.getAdapter().getCount(),
-                                                    sourceList.indexOf(target)
-                                            );
-                                            keyboardContainer.setVisibility(View.GONE);
-                                        }
-                                        break;
                                 }
                             }
                         }
@@ -467,47 +378,69 @@ public class TaskActivity extends WearableActivity {
 
     public void initListView() {
         if (keyboardMode != LI) {
-            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
-                    80,
-                    44
-            );
-            params.setMargins(240, 0, 0, 0);
+            if (returnKeyboardView.getParent() == null) {
+                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+                        80,
+                        44
+                );
+                params.setMargins(240, 0, 0, 0);
 
-            returnKeyboardView.setHeight(44);
-            returnKeyboardView.setMinimumHeight(44);
-            returnKeyboardView.setWidth(80);
-            returnKeyboardView.setMinimumWidth(80);
-            returnKeyboardView.setTextColor(Color.parseColor("#00FF00"));
-            returnKeyboardView.setCompoundDrawablesRelativeWithIntrinsicBounds(0, R.drawable.search, 0, 0);
-            returnKeyboardView.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
-
-            returnKeyboardView.setOnTouchListener((v, event) -> {
-                switch (event.getAction()) {
-                    case MotionEvent.ACTION_UP:
-                        logger.fileWriteLog(
-                                taskTrial,
-                                trial,
-                                (System.currentTimeMillis() - startTime),
-                                target,
-                                "to-keyboard",
-                                listview.getAdapter().getCount(),
-                                sourceList.indexOf(target)
-                        );
-                        keyboardContainer.setVisibility(View.VISIBLE);
-                        if (keyboardMode == ILSI) {
-                            searchView.setText(String.valueOf(sourceList.size()));
-                        }
-                        break;
-                }
-                return true;
-            });
-            ViewGroup taskViewGroup = (ViewGroup) findViewById(R.id.task);
-            taskViewGroup.addView(returnKeyboardView, 1, params);
-            returnKeyboardView.bringToFront();
+                ViewGroup taskViewGroup = (ViewGroup) findViewById(R.id.task);
+                taskViewGroup.addView(returnKeyboardView, 1, params);
+                returnKeyboardView.bringToFront();
+            }
+        } else {
+            if (returnKeyboardView.getParent() !=  null) {
+                ((ViewGroup) returnKeyboardView.getParent()).removeView(returnKeyboardView);
+            }
         }
     }
 
+    public void setupDynamicView() {
+        returnKeyboardView.setHeight(44);
+        returnKeyboardView.setMinimumHeight(44);
+        returnKeyboardView.setWidth(80);
+        returnKeyboardView.setMinimumWidth(80);
+        returnKeyboardView.setTextColor(Color.parseColor("#00FF00"));
+        returnKeyboardView.setCompoundDrawablesRelativeWithIntrinsicBounds(0, R.drawable.search, 0, 0);
+        returnKeyboardView.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
+
+        returnKeyboardView.setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_UP:
+                    logger.fileWriteLog(
+                            taskTrial,
+                            trial,
+                            (System.currentTimeMillis() - startTime),
+                            target,
+                            "to-keyboard",
+                            listview.getAdapter().getCount(),
+                            sourceList.indexOf(target)
+                    );
+                    keyboardContainer.setVisibility(View.VISIBLE);
+                    break;
+            }
+            return true;
+        });
+
+        placeholderTextView.setHeight(64);
+        placeholderTextView.setMinimumHeight(64);
+        placeholderTextView.setWidth(320);
+        placeholderTextView.setMinimumWidth(320);
+        placeholderTextView.setTextColor(Color.GREEN);
+        placeholderTextView.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
+
+        placeholderRecyclerView.setMinimumHeight(64);
+        placeholderRecyclerView.setMinimumWidth(320);
+        placeholderRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+    }
+
     public void checkSelectedItem(TextView selectedView) {
+
+        if (isSuccess) {
+            return;
+        }
+
         String selected = selectedView.getText().toString().replace("\n", " ");
 
         if (selected.equals(target)) {
@@ -521,11 +454,10 @@ public class TaskActivity extends WearableActivity {
                     sourceList.indexOf(target)
             );
             selectedView.setBackgroundColor(Color.parseColor("#f0FF00"));
-            successView.setVisibility(View.VISIBLE);
-            successView.bringToFront();
+            isSuccess = true;
             new Handler().postDelayed(() -> {
                 selectedView.setBackgroundColor(Color.WHITE);
-                successView.setVisibility(View.GONE);
+                isSuccess = false;
                 setNextTask();
             }, 1000);
         } else {
@@ -539,15 +471,25 @@ public class TaskActivity extends WearableActivity {
                     sourceList.indexOf(target)
             );
             selectedView.setBackgroundColor(Color.parseColor("#ff0F00"));
-            new Handler().postDelayed(() -> selectedView.setBackgroundColor(Color.WHITE), 1000);
+            new Handler().postDelayed(() -> selectedView.setBackgroundColor(Color.WHITE), 500);
         }
     }
 
     public void initKeyboardContainer() {
-        inputString = "";
         keyboardContainer.bringToFront();
         if (keyboardMode == LI) {
             keyboardContainer.setVisibility(View.GONE);
+        } else {
+            keyboardContainer.setVisibility(View.VISIBLE);
+        }
+
+        placeholderContainer.removeAllViews();
+        if (keyboardMode != ISI) {
+            placeholderContainer.addView(placeholderTextView);
+            searchView.setVisibility(View.VISIBLE);
+        } else {
+            placeholderContainer.addView(placeholderRecyclerView);
+            searchView.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -692,20 +634,11 @@ public class TaskActivity extends WearableActivity {
         sourceType = data[0];
 
         switch(data[2]) {
-            case "LALSI":
-                keyboardMode = LALSI;
-                break;
-            case "IALSI":
-                keyboardMode = IALSI;
-                break;
             case "LI":
                 keyboardMode = LI;
                 break;
             case "LSI":
                 keyboardMode = LSI;
-                break;
-            case "ILSI":
-                keyboardMode = ILSI;
                 break;
             case "ISI":
                 keyboardMode = ISI;
@@ -736,20 +669,11 @@ public class TaskActivity extends WearableActivity {
     public String changeKeyboardModeType(int keyboardMode) {
         String keyboardModeString = "";
         switch(keyboardMode) {
-            case LALSI:
-                keyboardModeString = "LALSI";
-                break;
-            case IALSI:
-                keyboardModeString = "IALSI";
-                break;
             case LI:
                 keyboardModeString = "LI";
                 break;
             case LSI:
                 keyboardModeString = "LSI";
-                break;
-            case ILSI:
-                keyboardModeString = "ILSI";
                 break;
             case ISI:
                 keyboardModeString = "ISI";
@@ -760,30 +684,16 @@ public class TaskActivity extends WearableActivity {
 
     public void setNextTask() {
 
-        searchView.setText("");
-        placeholderContainer.removeAllViews();
-
-        if (keyboardMode != ISI) {
-            placeholderContainer.addView(placeholderTextView);
-            searchView.setVisibility(View.VISIBLE);
-        } else {
-            placeholderContainer.addView(placeholderRecyclerView);
-            searchView.setVisibility(View.INVISIBLE);
-        }
-
         if (trial > trialLimit) {
             trial = 0;
             taskTrial = taskTrial + 1;
             setTaskList(userNum);
             targetIndexList = Util.predefineRandom(listSize, trialLimit + 1);
+
             String taskEndIndicator = listSize + "-" + changeKeyboardModeType(keyboardMode);
             taskEndView.setText(taskEndIndicator);
             taskEndView.setVisibility(View.VISIBLE);
             taskEndView.bringToFront();
-
-            if (returnKeyboardView.getParent() !=  null) {
-                ((ViewGroup) returnKeyboardView.getParent()).removeView(returnKeyboardView);
-            }
 
             new Handler().postDelayed(() -> {
                 taskEndView.setVisibility(View.GONE);
@@ -793,6 +703,10 @@ public class TaskActivity extends WearableActivity {
                 setNextTask();
             }, 5000);
         } else {
+            if (keyboardMode != LI) {
+                keyboardContainer.setVisibility(View.VISIBLE);
+            }
+
             target = originSourceList.get(targetIndexList[trial]);
             setSentence();
 
@@ -802,13 +716,16 @@ public class TaskActivity extends WearableActivity {
             }
             startView.setText(taskStartIndicator);
             startView.setVisibility(View.VISIBLE);
+            startView.bringToFront();
             startView.setOnTouchListener(null);
-            taskView.setVisibility(View.GONE);
+
+            isTask = false;
 
             inputString = "";
-            inputView.setText(inputString);
-            placeholderTextView.setText(inputString);
-            setResultAtListView(inputString);
+            inputView.setText("");
+            searchView.setText("");
+            placeholderTextView.setText("");
+            setResultAtListView("");
 
             jobScheduler.schedule(
                     new TimerTask() {
@@ -821,10 +738,7 @@ public class TaskActivity extends WearableActivity {
                                         runOnUiThread(() -> {
                                             startView.setBackgroundColor(Color.WHITE);
                                             startView.setVisibility(View.GONE);
-                                            taskView.setVisibility(View.VISIBLE);
-                                            if (keyboardMode != LI) {
-                                                keyboardContainer.setVisibility(View.VISIBLE);
-                                            }
+                                            isTask = true;
                                             trial = trial + 1;
                                             startTime = System.currentTimeMillis();
                                         });
