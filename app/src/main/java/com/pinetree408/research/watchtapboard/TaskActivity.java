@@ -45,7 +45,6 @@ import java.util.TimerTask;
 
 import io.socket.client.IO;
 import io.socket.client.Socket;
-import io.socket.emitter.Emitter;
 
 public class TaskActivity extends WearableActivity {
     private static final String TAG = TaskActivity.class.getSimpleName();
@@ -108,7 +107,6 @@ public class TaskActivity extends WearableActivity {
     Logger logger;
 
     boolean isSuccess;
-    boolean isTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -140,7 +138,6 @@ public class TaskActivity extends WearableActivity {
         taskTrial = 0;
 
         isSuccess = false;
-        isTask = false;
 
         // list Interface
         listview = (ListView) findViewById(R.id.list_view);
@@ -229,7 +226,7 @@ public class TaskActivity extends WearableActivity {
     public void setupKeyboardContainer() {
         keyboardContainer.setOnTouchListener((v, event) -> {
 
-            if (!isTask) {
+            if (isSuccess) {
                 return true;
             }
 
@@ -457,7 +454,6 @@ public class TaskActivity extends WearableActivity {
             isSuccess = true;
             new Handler().postDelayed(() -> {
                 selectedView.setBackgroundColor(Color.WHITE);
-                isSuccess = false;
                 setNextTask();
             }, 1000);
         } else {
@@ -538,15 +534,15 @@ public class TaskActivity extends WearableActivity {
 
     public ArrayList<String> getCorrectionSet(String inputString) {
         ArrayList<String> correctionSet = new ArrayList<>();
-        ArrayList<ArrayList<Character>> charSet = new ArrayList<>();
+        ArrayList<Character[]> charSet = new ArrayList<>();
         for (int i = 0; i < inputString.length(); i++) {
             charSet.add(getCloseCharFromKeyboard(inputString.charAt(i)));
         }
 
         for (int i = 0; i < charSet.size(); i++) {
-            for (int j = 0; j < charSet.get(i).size(); j++) {
+            for (int j = 0; j < charSet.get(i).length; j++) {
                 StringBuilder temp = new StringBuilder(inputString);
-                temp.setCharAt(i, charSet.get(i).get(j));
+                temp.setCharAt(i, charSet.get(i)[j]);
                 correctionSet.add(String.valueOf(temp));
             }
         }
@@ -556,62 +552,88 @@ public class TaskActivity extends WearableActivity {
         return correctionSet;
     }
 
-    public ArrayList<Character> getCloseCharFromKeyboard(char character) {
-        ArrayList<Character> closeSet = new ArrayList<>();
-        int row_pos = -1;
-        double col_pos = -1;
-        for (int i = 0; i < keyBoardView.keyboardChar.length; i++) {
-            char[] row = keyBoardView.keyboardChar[i];
-            for (int j = 0; j < row.length; j++) {
-                if (row[j] == character) {
-                    row_pos = i;
-                    if (row_pos == 0) {
-                        col_pos = j;
-                    } else if (row_pos == 1) {
-                        col_pos = j + 0.5;
-                    } else if (row_pos == 2) {
-                        col_pos = j + 1.0;
-                    }
-                    break;
-                }
-            }
+    public Character[] getCloseCharFromKeyboard(char character) {
+        Character[] closeSet = new Character[]{};
+        switch (character) {
+            case 'a':
+                closeSet = new Character[] {'q', 'w', 's', 'z'};
+                break;
+            case 'b':
+                closeSet = new Character[] {'n', 'h', 'g', 'v'};
+                break;
+            case 'c':
+                closeSet = new Character[] {'x', 'd', 'f', 'v'};
+                break;
+            case 'd':
+                closeSet = new Character[] {'e', 'r', 's', 'f', 'x', 'c'};
+                break;
+            case 'e':
+                closeSet = new Character[] {'w', 'r', 's', 'd'};
+                break;
+            case 'f':
+                closeSet = new Character[] {'r', 't', 'g', 'v', 'c', 'd'};
+                break;
+            case 'g':
+                closeSet = new Character[] {'t', 'y', 'h', 'b', 'v', 'f'};
+                break;
+            case 'h':
+                closeSet = new Character[] {'y', 'u', 'j', 'n', 'b', 'g'};
+                break;
+            case 'i':
+                closeSet = new Character[] {'u', 'j', 'k', 'o'};
+                break;
+            case 'j':
+                closeSet = new Character[] {'u', 'i', 'k', 'm', 'n', 'h'};
+                break;
+            case 'k':
+                closeSet = new Character[] {'i', 'o', 'l', 'm', 'j'};
+                break;
+            case 'l':
+                closeSet = new Character[] {'p', 'o', 'k'};
+                break;
+            case 'n':
+                closeSet = new Character[] {'b', 'h', 'j', 'm'};
+                break;
+            case 'm':
+                closeSet = new Character[] {'n', 'j', 'k', 'l'};
+                break;
+            case 'o':
+                closeSet = new Character[] {'i', 'k', 'l', 'p'};
+                break;
+            case 'p':
+                closeSet = new Character[] {'o', 'l'};
+                break;
+            case 'q':
+                closeSet = new Character[] {'w', 'a'};
+                break;
+            case 'r':
+                closeSet = new Character[] {'e', 'd', 'f', 't'};
+                break;
+            case 's':
+                closeSet = new Character[] {'w', 'e', 'a', 'd', 'z', 'x'};
+                break;
+            case 't':
+                closeSet = new Character[] {'r', 'f', 'g', 'y'};
+                break;
+            case 'u':
+                closeSet = new Character[] {'y', 'h', 'j', 'i'};
+                break;
+            case 'v':
+                closeSet = new Character[] {'c', 'f', 'g', 'b'};
+                break;
+            case 'w':
+                closeSet = new Character[] {'q', 'a', 's', 'e'};
+                break;
+            case 'x':
+                closeSet = new Character[] {'z', 's', 'd', 'c'};
+                break;
+            case 'y':
+                closeSet = new Character[] {'t', 'g', 'h', 'u'};
+                break;
+            case 'z':
+                closeSet = new Character[] {'a', 's', 'x'};
+                break;
         }
-
-        for (int i = 0; i < keyBoardView.keyboardChar.length; i++) {
-            char[] row = keyBoardView.keyboardChar[i];
-            for (int j = 0; j < row.length; j++) {
-                if (i == row_pos - 1) {
-                    if (j == (int) (col_pos + 0.5) || j == (int) (col_pos - 0.5)){
-                        closeSet.add(row[j]);
-                    }
-                } else if (i == row_pos) {
-                    if (i == 0) {
-                        if (j == (int) (col_pos - 1) || j == (int) (col_pos + 1)){
-                            closeSet.add(row[j]);
-                        }
-                    } else if (i == 1){
-                        if (j == (int) (col_pos - 1.5) || j == (int) (col_pos + 0.5)){
-                            closeSet.add(row[j]);
-                        }
-                    } else if (i == 2) {
-                        if (j == (int) (col_pos - 2) || j == (int) col_pos){
-                            closeSet.add(row[j]);
-                        }
-                    }
-                } else if (i == row_pos + 1) {
-                    if (i == 1) {
-                        if (j == (int) (col_pos) || j == (int) (col_pos - 1)){
-                            closeSet.add(row[j]);
-                        }
-                    } else if (i == 2){
-                        if (j == (int) (col_pos - 0.5) || j == (int) (col_pos - 1.5)){
-                            closeSet.add(row[j]);
-                        }
-                    }
-                }
-            }
-        }
-
         return closeSet;
     }
 
@@ -703,9 +725,7 @@ public class TaskActivity extends WearableActivity {
                 setNextTask();
             }, 5000);
         } else {
-            if (keyboardMode != LI) {
-                keyboardContainer.setVisibility(View.VISIBLE);
-            }
+            taskView.setVisibility(View.GONE);
 
             target = originSourceList.get(targetIndexList[trial]);
             setSentence();
@@ -717,9 +737,6 @@ public class TaskActivity extends WearableActivity {
             startView.setText(taskStartIndicator);
             startView.setVisibility(View.VISIBLE);
             startView.bringToFront();
-            startView.setOnTouchListener(null);
-
-            isTask = false;
 
             inputString = "";
             inputView.setText("");
@@ -736,9 +753,15 @@ public class TaskActivity extends WearableActivity {
                                 switch (event.getAction()) {
                                     case MotionEvent.ACTION_UP:
                                         runOnUiThread(() -> {
+                                            startView.setOnTouchListener(null);
                                             startView.setBackgroundColor(Color.WHITE);
                                             startView.setVisibility(View.GONE);
-                                            isTask = true;
+
+                                            taskView.setVisibility(View.VISIBLE);
+                                            if (keyboardMode != LI) {
+                                                keyboardContainer.setVisibility(View.VISIBLE);
+                                            }
+                                            isSuccess = false;
                                             trial = trial + 1;
                                             startTime = System.currentTimeMillis();
                                         });
