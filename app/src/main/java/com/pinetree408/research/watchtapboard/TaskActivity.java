@@ -201,10 +201,10 @@ public class TaskActivity extends WearableActivity {
                 String tempString = tempView.getText().toString();
                 if (inputString.length() > 0) {
                     if (tempString.split(" ")[0].startsWith(inputString)) {
-                        String sourceString = "<b>" + inputString + "</b>" + tempString.substring(inputString.length(), tempString.length());
+                        String sourceString = "<font color='green'><b>" + inputString + "</b></font>" + tempString.substring(inputString.length(), tempString.length());
                         tempView.setText(Html.fromHtml(sourceString));
                     } else if (tempString.split(" ")[1].startsWith(inputString)) {
-                        String sourceString = tempString.split(" ")[0] + " <b>" + inputString + "</b>" + tempString.split(" ")[1].substring(inputString.length(), tempString.split(" ")[1].length());
+                        String sourceString = tempString.split(" ")[0] + " <font color='green'><b>" + inputString + "</b></font>" + tempString.split(" ")[1].substring(inputString.length(), tempString.split(" ")[1].length());
                         tempView.setText(Html.fromHtml(sourceString));
                     }
                 }
@@ -292,10 +292,10 @@ public class TaskActivity extends WearableActivity {
                                         if (sourceList.size() != 0 && !inputString.equals("")) {
                                             String tempString = sourceList.get(0);
                                             if (tempString.split(" ")[0].startsWith(inputString)) {
-                                                String sourceString = "<b>" + inputString + "</b>" + tempString.substring(inputString.length(), tempString.length());
+                                                String sourceString = "<font color='green'><b>" + inputString + "</b></font>" + tempString.substring(inputString.length(), tempString.length());
                                                 placeholderTextView.setText(Html.fromHtml(sourceString));
                                             } else if (tempString.split(" ")[1].startsWith(inputString)) {
-                                                String sourceString = tempString.split(" ")[0] + " <b>" + inputString + "</b>" + tempString.split(" ")[1].substring(inputString.length(), tempString.split(" ")[1].length());
+                                                String sourceString = tempString.split(" ")[0] + " <font color='green'><b>" + inputString + "</b></font>" + tempString.split(" ")[1].substring(inputString.length(), tempString.split(" ")[1].length());
                                                 placeholderTextView.setText(Html.fromHtml(sourceString));
                                             } else {
                                                 placeholderTextView.setText(sourceList.get(0));
@@ -334,10 +334,10 @@ public class TaskActivity extends WearableActivity {
                                 if (sourceList.size() != 0) {
                                     String tempString = sourceList.get(0);
                                     if (tempString.split(" ")[0].startsWith(inputString)) {
-                                        String sourceString = "<b>" + inputString + "</b>" + tempString.substring(inputString.length(), tempString.length());
+                                        String sourceString = "<font color='green'><b>" + inputString + "</b></font>" + tempString.substring(inputString.length(), tempString.length());
                                         placeholderTextView.setText(Html.fromHtml(sourceString));
                                     } else if (tempString.split(" ")[1].startsWith(inputString)) {
-                                        String sourceString = tempString.split(" ")[0] + " <b>" + inputString + "</b>" + tempString.split(" ")[1].substring(inputString.length(), tempString.split(" ")[1].length());
+                                        String sourceString = tempString.split(" ")[0] + " <font color='green'><b>" + inputString + "</b></font>" + tempString.split(" ")[1].substring(inputString.length(), tempString.split(" ")[1].length());
                                         placeholderTextView.setText(Html.fromHtml(sourceString));
                                     } else {
                                         placeholderTextView.setText(sourceList.get(0));
@@ -398,7 +398,6 @@ public class TaskActivity extends WearableActivity {
         returnKeyboardView.setMinimumHeight(44);
         returnKeyboardView.setWidth(80);
         returnKeyboardView.setMinimumWidth(80);
-        returnKeyboardView.setTextColor(Color.parseColor("#00FF00"));
         returnKeyboardView.setCompoundDrawablesRelativeWithIntrinsicBounds(0, R.drawable.search, 0, 0);
         returnKeyboardView.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
 
@@ -424,7 +423,7 @@ public class TaskActivity extends WearableActivity {
         placeholderTextView.setMinimumHeight(64);
         placeholderTextView.setWidth(320);
         placeholderTextView.setMinimumWidth(320);
-        placeholderTextView.setTextColor(Color.GREEN);
+        placeholderTextView.setTextColor(Color.BLACK);
         placeholderTextView.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
 
         placeholderRecyclerView.setMinimumHeight(64);
@@ -692,13 +691,13 @@ public class TaskActivity extends WearableActivity {
         String keyboardModeString = "";
         switch(keyboardMode) {
             case LI:
-                keyboardModeString = "LI";
+                keyboardModeString = "List";
                 break;
             case LSI:
-                keyboardModeString = "LSI";
+                keyboardModeString = "List with search field";
                 break;
             case ISI:
-                keyboardModeString = "ISI";
+                keyboardModeString = "Integrated search";
                 break;
         }
         return keyboardModeString;
@@ -712,7 +711,7 @@ public class TaskActivity extends WearableActivity {
             setTaskList(userNum);
             targetIndexList = Util.predefineRandom(listSize, trialLimit + 1);
 
-            String taskEndIndicator = listSize + "-" + changeKeyboardModeType(keyboardMode);
+            String taskEndIndicator = listSize + "\n" + changeKeyboardModeType(keyboardMode);
             taskEndView.setText(taskEndIndicator);
             taskEndView.setVisibility(View.VISIBLE);
             taskEndView.bringToFront();
@@ -732,7 +731,7 @@ public class TaskActivity extends WearableActivity {
 
             String taskStartIndicator = (trial + 1) + "/" + (trialLimit + 1) + "\n" + target;
             if (taskTrial == 0 && trial == 0) {
-                taskStartIndicator = listSize + "-" + changeKeyboardModeType(keyboardMode) + "\n" + taskStartIndicator;
+                taskStartIndicator = listSize + "\n" + changeKeyboardModeType(keyboardMode) + "\n" + taskStartIndicator;
             }
             startView.setText(taskStartIndicator);
             startView.setVisibility(View.VISIBLE);

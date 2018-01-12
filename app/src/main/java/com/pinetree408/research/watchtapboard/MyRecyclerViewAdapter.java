@@ -47,11 +47,12 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
 
         if (inputString.length() > 0) {
             if (animal.split(" ")[0].startsWith(inputString)) {
-                animal = "<b>" + inputString + "</b>" + animal.substring(inputString.length(), animal.length());
+                animal = "<font@color='green'><b>" + inputString + "</b></font>" + animal.substring(inputString.length(), animal.length());
             } else if (animal.split(" ")[1].startsWith(inputString)) {
-                animal = animal.split(" ")[0] + " <b>" + inputString + "</b>" + animal.split(" ")[1].substring(inputString.length(), animal.split(" ")[1].length());
+                animal = animal.split(" ")[0] + " <font@color='green'><b>" + inputString + "</b></font>" + animal.split(" ")[1].substring(inputString.length(), animal.split(" ")[1].length());
             }
             animal = animal.split(" ")[0] + "<br>" + animal.split(" ")[1];
+            animal = animal.replace("@", " ");
             holder.myTextView.setText(Html.fromHtml(animal));
         } else {
             animal = animal.split(" ")[0] + "\n" + animal.split(" ")[1];
