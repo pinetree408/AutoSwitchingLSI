@@ -48,11 +48,11 @@ public class Logger {
         fileWrite(header);
     }
     public void fileWriteLog(
-            int block, int trial, long eventTime,
-            String target, String inputKey, int listSize, int index) {
+            int block, int trial, int poolSize, String tech, long eventTime,
+            String target, String inputKey, String inputString, int listSize, int index) {
 
-        String log = block + "," + trial + "," + eventTime + "," +
-                target + "," + inputKey + "," + listSize + "," + (index + 1) + "\n";
+        String log = block + "," + trial + "," + poolSize + "," + tech + "," + eventTime + "," +
+                target + "," + inputKey + "," +  inputString + "," + listSize + "," + (index + 1) + "\n";
         fileWrite(log);
     }
 

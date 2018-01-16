@@ -52,6 +52,7 @@ public class TaskActivity extends WearableActivity {
     static final int REQUEST_CODE_FILE = 1;
 
     String ip = "143.248.56.249";
+    // String ip = "143.248.53.191";
     int port = 5000;
 
     Socket socket;
@@ -93,7 +94,7 @@ public class TaskActivity extends WearableActivity {
     TextView returnKeyboardView;
 
     TextView startView;
-    View taskView;
+    ViewGroup taskView;
 
     // Exp Variable
     int listSize;
@@ -134,7 +135,7 @@ public class TaskActivity extends WearableActivity {
 
         listSize = 0;
         trial = 0;
-        trialLimit = 7;
+        trialLimit = 6;
         taskTrial = 0;
 
         isSuccess = false;
@@ -157,7 +158,7 @@ public class TaskActivity extends WearableActivity {
 
         // Task Interface
         startView = (TextView) findViewById(R.id.start);
-        taskView = findViewById(R.id.task);
+        taskView = (ViewGroup) findViewById(R.id.task);
         taskEndView = (TextView) findViewById(R.id.task_end);
 
         // Init
@@ -184,7 +185,7 @@ public class TaskActivity extends WearableActivity {
 
     public void setupLogger(int userNum) {
         String filePath = Environment.getExternalStorageDirectory().getAbsoluteFile() + "/";
-        String fileFormat = "block, trial, eventTime, target, inputKey, listSize, index";
+        String fileFormat = "block, trial, poolSize, tech, eventTime, target, inputKey, inputString, listSize, index";
         String fileName = "result_bb_" + userNum + ".csv";
         logger = new Logger(filePath, fileName);
         logger.fileOpen(userNum);
@@ -217,16 +218,68 @@ public class TaskActivity extends WearableActivity {
                 checkSelectedItem((TextView) view);
             }
         });
+        listview.setOnTouchListener((v, event) -> {
+            if (trial == 0 || isSuccess) {
+                return true;
+            }
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    logger.fileWriteLog(
+                            taskTrial,
+                            trial,
+                            originSourceList.size(),
+                            changeKeyboardModeTypeAtLog(keyboardMode),
+                            (System.currentTimeMillis() - startTime),
+                            target,
+                            "touch-list",
+                            inputString,
+                            listview.getAdapter().getCount(),
+                            sourceList.indexOf(target)
+                    );
+                    break;
+            }
+            return false;
+        });
 
         placeholderAdapter = new MyRecyclerViewAdapter(this, sourceList);
         placeholderAdapter.setClickListener((view, position) -> checkSelectedItem((TextView) view));
         placeholderRecyclerView.setAdapter(placeholderAdapter);
+        placeholderRecyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
+            @Override
+            public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
+                if (trial == 0 || isSuccess) {
+                    return true;
+                }
+                switch (e.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        logger.fileWriteLog(
+                                taskTrial,
+                                trial,
+                                originSourceList.size(),
+                                changeKeyboardModeTypeAtLog(keyboardMode),
+                                (System.currentTimeMillis() - startTime),
+                                target,
+                                "touch-list",
+                                inputString,
+                                listview.getAdapter().getCount(),
+                                sourceList.indexOf(target)
+                        );
+                        break;
+                }
+                return false;
+            }
+            @Override
+            public void onTouchEvent(RecyclerView rv, MotionEvent e) {
+            }
+            @Override
+            public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+            }
+        });
     }
 
     public void setupKeyboardContainer() {
         keyboardContainer.setOnTouchListener((v, event) -> {
-
-            if (isSuccess) {
+            if (trial == 0 || isSuccess) {
                 return true;
             }
 
@@ -253,16 +306,19 @@ public class TaskActivity extends WearableActivity {
                             // tap
                             if (tempY < placeholderContainer.getY()) {
                                 if ((keyBoardView.getX() + (keyBoardView.getWidth() / 2)) < tempX) {
-                                    logger.fileWriteLog(
-                                            taskTrial,
-                                            trial,
-                                            (System.currentTimeMillis() - startTime),
-                                            target,
-                                            "to-list",
-                                            listview.getAdapter().getCount(),
-                                            sourceList.indexOf(target)
-                                    );
                                     if (keyboardMode != ISI) {
+                                        logger.fileWriteLog(
+                                                taskTrial,
+                                                trial,
+                                                originSourceList.size(),
+                                                changeKeyboardModeTypeAtLog(keyboardMode),
+                                                (System.currentTimeMillis() - startTime),
+                                                target,
+                                                "to-list",
+                                                inputString,
+                                                listview.getAdapter().getCount(),
+                                                sourceList.indexOf(target)
+                                        );
                                         keyboardContainer.setVisibility(View.GONE);
                                     }
                                 }
@@ -272,9 +328,12 @@ public class TaskActivity extends WearableActivity {
                                 logger.fileWriteLog(
                                         taskTrial,
                                         trial,
+                                        originSourceList.size(),
+                                        changeKeyboardModeTypeAtLog(keyboardMode),
                                         (System.currentTimeMillis() - startTime),
                                         target,
                                         "delete",
+                                        inputString,
                                         listview.getAdapter().getCount(),
                                         sourceList.indexOf(target)
                                 );
@@ -311,9 +370,12 @@ public class TaskActivity extends WearableActivity {
                                     logger.fileWriteLog(
                                             taskTrial,
                                             trial,
+                                            originSourceList.size(),
+                                            changeKeyboardModeTypeAtLog(keyboardMode),
                                             (System.currentTimeMillis() - startTime),
                                             target,
                                             params[0],
+                                            inputString,
                                             listview.getAdapter().getCount(),
                                             sourceList.indexOf(target)
                                     );
@@ -324,9 +386,12 @@ public class TaskActivity extends WearableActivity {
                                 logger.fileWriteLog(
                                         taskTrial,
                                         trial,
+                                        originSourceList.size(),
+                                        changeKeyboardModeTypeAtLog(keyboardMode),
                                         (System.currentTimeMillis() - startTime),
                                         target,
                                         params[0],
+                                        inputString,
                                         listview.getAdapter().getCount(),
                                         sourceList.indexOf(target)
                                 );
@@ -357,6 +422,7 @@ public class TaskActivity extends WearableActivity {
 
     public void initSourceList() {
         originSourceList = new ArrayList<>(Arrays.asList(Source.fullName));
+        Collections.shuffle(originSourceList);
         originSourceList = new ArrayList<>(originSourceList.subList(listSize, listSize * 2));
         Collections.sort(originSourceList);
         sourceList.addAll(originSourceList);
@@ -382,8 +448,7 @@ public class TaskActivity extends WearableActivity {
                 );
                 params.setMargins(240, 0, 0, 0);
 
-                ViewGroup taskViewGroup = (ViewGroup) findViewById(R.id.task);
-                taskViewGroup.addView(returnKeyboardView, 1, params);
+                taskView.addView(returnKeyboardView, 1, params);
                 returnKeyboardView.bringToFront();
             }
         } else {
@@ -407,9 +472,12 @@ public class TaskActivity extends WearableActivity {
                     logger.fileWriteLog(
                             taskTrial,
                             trial,
+                            originSourceList.size(),
+                            changeKeyboardModeTypeAtLog(keyboardMode),
                             (System.currentTimeMillis() - startTime),
                             target,
                             "to-keyboard",
+                            inputString,
                             listview.getAdapter().getCount(),
                             sourceList.indexOf(target)
                     );
@@ -433,7 +501,7 @@ public class TaskActivity extends WearableActivity {
 
     public void checkSelectedItem(TextView selectedView) {
 
-        if (isSuccess) {
+        if (trial == 0 || isSuccess) {
             return;
         }
 
@@ -443,9 +511,12 @@ public class TaskActivity extends WearableActivity {
             logger.fileWriteLog(
                     taskTrial,
                     trial,
+                    originSourceList.size(),
+                    changeKeyboardModeTypeAtLog(keyboardMode),
                     (System.currentTimeMillis() - startTime),
                     target,
                     "item-success",
+                    inputString,
                     listview.getAdapter().getCount(),
                     sourceList.indexOf(target)
             );
@@ -459,9 +530,12 @@ public class TaskActivity extends WearableActivity {
             logger.fileWriteLog(
                     taskTrial,
                     trial,
+                    originSourceList.size(),
+                    changeKeyboardModeTypeAtLog(keyboardMode),
                     (System.currentTimeMillis() - startTime),
                     target,
                     "item-err",
+                    inputString,
                     listview.getAdapter().getCount(),
                     sourceList.indexOf(target)
             );
@@ -703,6 +777,22 @@ public class TaskActivity extends WearableActivity {
         return keyboardModeString;
     }
 
+    public String changeKeyboardModeTypeAtLog(int keyboardMode) {
+        String keyboardModeString = "";
+        switch(keyboardMode) {
+            case LI:
+                keyboardModeString = "LI";
+                break;
+            case LSI:
+                keyboardModeString = "LSI";
+                break;
+            case ISI:
+                keyboardModeString = "ISI";
+                break;
+        }
+        return keyboardModeString;
+    }
+
     public void setNextTask() {
 
         if (trial > trialLimit) {
@@ -724,8 +814,6 @@ public class TaskActivity extends WearableActivity {
                 setNextTask();
             }, 5000);
         } else {
-            taskView.setVisibility(View.GONE);
-
             target = originSourceList.get(targetIndexList[trial]);
             setSentence();
 
@@ -752,17 +840,17 @@ public class TaskActivity extends WearableActivity {
                                 switch (event.getAction()) {
                                     case MotionEvent.ACTION_UP:
                                         runOnUiThread(() -> {
+                                            isSuccess = false;
+                                            trial = trial + 1;
+                                            startTime = System.currentTimeMillis();
+
                                             startView.setOnTouchListener(null);
                                             startView.setBackgroundColor(Color.WHITE);
                                             startView.setVisibility(View.GONE);
 
-                                            taskView.setVisibility(View.VISIBLE);
                                             if (keyboardMode != LI) {
                                                 keyboardContainer.setVisibility(View.VISIBLE);
                                             }
-                                            isSuccess = false;
-                                            trial = trial + 1;
-                                            startTime = System.currentTimeMillis();
                                         });
                                         break;
                                 }
