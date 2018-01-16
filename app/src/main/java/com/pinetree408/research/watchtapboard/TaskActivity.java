@@ -135,7 +135,7 @@ public class TaskActivity extends WearableActivity {
 
         listSize = 0;
         trial = 0;
-        trialLimit = 6;
+        trialLimit = 5;
         taskTrial = 0;
 
         isSuccess = false;
@@ -539,6 +539,7 @@ public class TaskActivity extends WearableActivity {
                     listview.getAdapter().getCount(),
                     sourceList.indexOf(target)
             );
+            setSentence();
             selectedView.setBackgroundColor(Color.parseColor("#ff0F00"));
             new Handler().postDelayed(() -> selectedView.setBackgroundColor(Color.WHITE), 500);
         }
