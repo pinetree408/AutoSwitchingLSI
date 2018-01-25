@@ -26,7 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.pinetree408.research.watchtapboard.exp.source.Source;
-import com.pinetree408.research.watchtapboard.exp.tasklist.ExpOneTaskList;
+import com.pinetree408.research.watchtapboard.exp.tasklist.ExpTwoTaskList;
 import com.pinetree408.research.watchtapboard.util.KeyBoardView;
 import com.pinetree408.research.watchtapboard.util.Logger;
 import com.pinetree408.research.watchtapboard.util.Util;
@@ -70,6 +70,7 @@ public class TaskActivity extends WearableActivity {
     ArrayAdapter<String> adapter;
     ListView listview;
 
+    TextView indicatorView;
     TextView inputView;
     TextView searchView;
     LinearLayout placeholderContainer;
@@ -89,6 +90,9 @@ public class TaskActivity extends WearableActivity {
     static final int LI = 0;
     static final int LSI = 1;
     static final int ISI = 2;
+    static final int ONE_ALSI = 3;
+    static final int TWO_ALSI = 4;
+    static final int THREE_ALSI = 5;
 
     int keyboardMode;
     TextView returnKeyboardView;
@@ -145,6 +149,7 @@ public class TaskActivity extends WearableActivity {
 
         // Search Interface
         keyboardContainer = findViewById(R.id.keyboard_container);
+        indicatorView = (TextView) findViewById(R.id.indicator);
         inputView = (TextView) findViewById(R.id.input);
         searchView = (TextView) findViewById(R.id.search);
 
@@ -166,7 +171,7 @@ public class TaskActivity extends WearableActivity {
 
         setupLogger(userNum);
 
-        if (userNum == 0) {
+        if (userNum == 0 || userNum == 1) {
             trialLimit = 2;
         }
 
@@ -347,6 +352,9 @@ public class TaskActivity extends WearableActivity {
                                         break;
                                     case LSI:
                                     case ISI:
+                                    case ONE_ALSI:
+                                    case TWO_ALSI:
+                                    case THREE_ALSI:
                                         inputView.setText(inputString);
                                         if (sourceList.size() != 0 && !inputString.equals("")) {
                                             String tempString = sourceList.get(0);
@@ -361,6 +369,64 @@ public class TaskActivity extends WearableActivity {
                                             }
                                         } else {
                                             placeholderTextView.setText("");
+                                        }
+                                        break;
+                                }
+
+                                switch (keyboardMode) {
+                                    case LI:
+                                    case LSI:
+                                    case ISI:
+                                        break;
+                                    case ONE_ALSI:
+                                        if (inputString.length() >= 1) {
+                                            logger.fileWriteLog(
+                                                    taskTrial,
+                                                    trial,
+                                                    originSourceList.size(),
+                                                    changeKeyboardModeTypeAtLog(keyboardMode),
+                                                    (System.currentTimeMillis() - startTime),
+                                                    target,
+                                                    "to-list",
+                                                    inputString,
+                                                    listview.getAdapter().getCount(),
+                                                    sourceList.indexOf(target)
+                                            );
+                                            keyboardContainer.setVisibility(View.GONE);
+                                        }
+                                        break;
+                                    case TWO_ALSI:
+                                        if (inputString.length() >= 2) {
+                                            logger.fileWriteLog(
+                                                    taskTrial,
+                                                    trial,
+                                                    originSourceList.size(),
+                                                    changeKeyboardModeTypeAtLog(keyboardMode),
+                                                    (System.currentTimeMillis() - startTime),
+                                                    target,
+                                                    "to-list",
+                                                    inputString,
+                                                    listview.getAdapter().getCount(),
+                                                    sourceList.indexOf(target)
+                                            );
+                                            keyboardContainer.setVisibility(View.GONE);
+                                        }
+                                        break;
+                                    case THREE_ALSI:
+                                        if (inputString.length() >= 3) {
+                                            logger.fileWriteLog(
+                                                    taskTrial,
+                                                    trial,
+                                                    originSourceList.size(),
+                                                    changeKeyboardModeTypeAtLog(keyboardMode),
+                                                    (System.currentTimeMillis() - startTime),
+                                                    target,
+                                                    "to-list",
+                                                    inputString,
+                                                    listview.getAdapter().getCount(),
+                                                    sourceList.indexOf(target)
+                                            );
+                                            keyboardContainer.setVisibility(View.GONE);
                                         }
                                         break;
                                 }
@@ -409,6 +475,63 @@ public class TaskActivity extends WearableActivity {
                                     }
                                 } else {
                                     placeholderTextView.setText("");
+                                }
+                                switch (keyboardMode) {
+                                    case LI:
+                                    case LSI:
+                                    case ISI:
+                                        break;
+                                    case ONE_ALSI:
+                                        if (inputString.length() >= 1) {
+                                            logger.fileWriteLog(
+                                                    taskTrial,
+                                                    trial,
+                                                    originSourceList.size(),
+                                                    changeKeyboardModeTypeAtLog(keyboardMode),
+                                                    (System.currentTimeMillis() - startTime),
+                                                    target,
+                                                    "to-list",
+                                                    inputString,
+                                                    listview.getAdapter().getCount(),
+                                                    sourceList.indexOf(target)
+                                            );
+                                            keyboardContainer.setVisibility(View.GONE);
+                                        }
+                                        break;
+                                    case TWO_ALSI:
+                                        if (inputString.length() >= 2) {
+                                            logger.fileWriteLog(
+                                                    taskTrial,
+                                                    trial,
+                                                    originSourceList.size(),
+                                                    changeKeyboardModeTypeAtLog(keyboardMode),
+                                                    (System.currentTimeMillis() - startTime),
+                                                    target,
+                                                    "to-list",
+                                                    inputString,
+                                                    listview.getAdapter().getCount(),
+                                                    sourceList.indexOf(target)
+                                            );
+                                            keyboardContainer.setVisibility(View.GONE);
+                                        }
+                                        break;
+                                    case THREE_ALSI:
+                                        if (inputString.length() >= 3) {
+                                            logger.fileWriteLog(
+                                                    taskTrial,
+                                                    trial,
+                                                    originSourceList.size(),
+                                                    changeKeyboardModeTypeAtLog(keyboardMode),
+                                                    (System.currentTimeMillis() - startTime),
+                                                    target,
+                                                    "to-list",
+                                                    inputString,
+                                                    listview.getAdapter().getCount(),
+                                                    sourceList.indexOf(target)
+                                            );
+                                            keyboardContainer.setVisibility(View.GONE);
+                                        }
+                                        break;
                                 }
                             }
                         }
@@ -626,6 +749,54 @@ public class TaskActivity extends WearableActivity {
         return correctionSet;
     }
 
+    public void Simulation() {
+        for (String source : originSourceList) {
+            for (int j = 0; j < 2; j++) {
+                String row = "," + source;
+                String input = "";
+                for (int i = 1; i < 7; i++) {
+                    if (j == 0) {
+                        input = source.substring(0, i);
+                    } else {
+                        if (source.split(" ")[1].length() <= i) {
+                            row = row + "," + 0;
+                            continue;
+                        }
+                        input = source.split(" ")[1].substring(0, i);
+                    }
+                    ArrayList<String> tempList = new ArrayList<>();
+                    for (String item : originSourceList) {
+                        if (item.replace(" ", "").startsWith(input)) {
+                            if (!tempList.contains(item)) {
+                                tempList.add(item);
+                            }
+                        }
+                    }
+                    for (String item : originSourceList) {
+                        if (item.split(" ")[1].startsWith(input)) {
+                            if (!tempList.contains(item)) {
+                                tempList.add(item);
+                            }
+                        }
+                    }
+                    ArrayList<String> correctionSet = getCorrectionSet(input);
+                    for (String item : originSourceList) {
+                        for (String corrected : correctionSet) {
+                            if (item.replace(" ", "").startsWith(corrected)
+                                    || item.split(" ")[1].startsWith(corrected)) {
+                                if (!tempList.contains(item)) {
+                                    tempList.add(item);
+                                }
+                            }
+                        }
+                    }
+                    row = row + "," + tempList.size();
+                }
+                Log.d(TAG, row);
+            }
+        }
+    }
+
     public Character[] getCloseCharFromKeyboard(char character) {
         Character[] closeSet = new Character[]{};
         switch (character) {
@@ -739,12 +910,21 @@ public class TaskActivity extends WearableActivity {
             case "ISI":
                 keyboardMode = ISI;
                 break;
+            case "1-ALSI":
+                keyboardMode = ONE_ALSI;
+                break;
+            case "2-ALSI":
+                keyboardMode = TWO_ALSI;
+                break;
+            case "3-ALSI":
+                keyboardMode = THREE_ALSI;
+                break;
         }
     }
 
     public void setTaskList(int userNum) {
         try {
-            Field[] fields = ExpOneTaskList.class.getDeclaredFields();
+            Field[] fields = ExpTwoTaskList.class.getDeclaredFields();
             HashMap<String, String[]> taskListSet = new HashMap<>();
             for (Field f : fields) {
                 if (f.get(null) instanceof String[]) {
@@ -769,10 +949,23 @@ public class TaskActivity extends WearableActivity {
                 keyboardModeString = "List";
                 break;
             case LSI:
-                keyboardModeString = "List with search field";
+                if (userNum < 13) {
+                    keyboardModeString = "Manual switch";
+                } else {
+                    keyboardModeString = "List with search field";
+                }
                 break;
             case ISI:
                 keyboardModeString = "Integrated search";
+                break;
+            case ONE_ALSI:
+                keyboardModeString = "Auto switch on 1 type";
+                break;
+            case TWO_ALSI:
+                keyboardModeString = "Auto switch on 2 type";
+                break;
+            case THREE_ALSI:
+                keyboardModeString = "Auto switch on 3 type";
                 break;
         }
         return keyboardModeString;
@@ -789,6 +982,15 @@ public class TaskActivity extends WearableActivity {
                 break;
             case ISI:
                 keyboardModeString = "ISI";
+                break;
+            case ONE_ALSI:
+                keyboardModeString = "1-ALSI";
+                break;
+            case TWO_ALSI:
+                keyboardModeString = "2-ALSI";
+                break;
+            case THREE_ALSI:
+                keyboardModeString = "3-ALSI";
                 break;
         }
         return keyboardModeString;
@@ -825,6 +1027,23 @@ public class TaskActivity extends WearableActivity {
             startView.setText(taskStartIndicator);
             startView.setVisibility(View.VISIBLE);
             startView.bringToFront();
+
+            switch(keyboardMode) {
+                case LI:
+                case LSI:
+                case ISI:
+                    indicatorView.setText("");
+                    break;
+                case ONE_ALSI:
+                    indicatorView.setText("1");
+                    break;
+                case TWO_ALSI:
+                    indicatorView.setText("2");
+                    break;
+                case THREE_ALSI:
+                    indicatorView.setText("3");
+                    break;
+            }
 
             inputString = "";
             inputView.setText("");
