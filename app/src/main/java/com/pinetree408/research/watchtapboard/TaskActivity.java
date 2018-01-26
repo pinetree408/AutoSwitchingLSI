@@ -110,6 +110,7 @@ public class TaskActivity extends WearableActivity {
     String sourceType;
     int taskTrial;
     Logger logger;
+    long autoToListTime;
 
     boolean isSuccess;
 
@@ -171,7 +172,7 @@ public class TaskActivity extends WearableActivity {
 
         setupLogger(userNum);
 
-        if (userNum == 0 || userNum == 1) {
+        if (userNum == 0) {
             trialLimit = 2;
         }
 
@@ -220,7 +221,20 @@ public class TaskActivity extends WearableActivity {
         listview.setAdapter(adapter);
         listview.setOnItemClickListener((parent, view, position, id) -> {
             if ((System.currentTimeMillis() - startTime) >= 200) {
-                checkSelectedItem((TextView) view);
+                switch(keyboardMode) {
+                    case LI:
+                    case LSI:
+                    case ISI:
+                        checkSelectedItem((TextView) view);
+                        break;
+                    case ONE_ALSI:
+                    case TWO_ALSI:
+                    case THREE_ALSI:
+                        if ((System.currentTimeMillis() - autoToListTime) >= 500) {
+                            checkSelectedItem((TextView) view);
+                        }
+                        break;
+                }
             }
         });
         listview.setOnTouchListener((v, event) -> {
@@ -311,7 +325,7 @@ public class TaskActivity extends WearableActivity {
                             // tap
                             if (tempY < placeholderContainer.getY()) {
                                 if ((keyBoardView.getX() + (keyBoardView.getWidth() / 2)) < tempX) {
-                                    if (keyboardMode != ISI) {
+                                    if (keyboardMode == LSI) {
                                         logger.fileWriteLog(
                                                 taskTrial,
                                                 trial,
@@ -387,11 +401,12 @@ public class TaskActivity extends WearableActivity {
                                                     changeKeyboardModeTypeAtLog(keyboardMode),
                                                     (System.currentTimeMillis() - startTime),
                                                     target,
-                                                    "to-list",
+                                                    "auto-switch",
                                                     inputString,
                                                     listview.getAdapter().getCount(),
                                                     sourceList.indexOf(target)
                                             );
+                                            autoToListTime = System.currentTimeMillis();
                                             keyboardContainer.setVisibility(View.GONE);
                                         }
                                         break;
@@ -404,11 +419,12 @@ public class TaskActivity extends WearableActivity {
                                                     changeKeyboardModeTypeAtLog(keyboardMode),
                                                     (System.currentTimeMillis() - startTime),
                                                     target,
-                                                    "to-list",
+                                                    "auto-switch",
                                                     inputString,
                                                     listview.getAdapter().getCount(),
                                                     sourceList.indexOf(target)
                                             );
+                                            autoToListTime = System.currentTimeMillis();
                                             keyboardContainer.setVisibility(View.GONE);
                                         }
                                         break;
@@ -421,11 +437,12 @@ public class TaskActivity extends WearableActivity {
                                                     changeKeyboardModeTypeAtLog(keyboardMode),
                                                     (System.currentTimeMillis() - startTime),
                                                     target,
-                                                    "to-list",
+                                                    "auto-switch",
                                                     inputString,
                                                     listview.getAdapter().getCount(),
                                                     sourceList.indexOf(target)
                                             );
+                                            autoToListTime = System.currentTimeMillis();
                                             keyboardContainer.setVisibility(View.GONE);
                                         }
                                         break;
@@ -490,11 +507,12 @@ public class TaskActivity extends WearableActivity {
                                                     changeKeyboardModeTypeAtLog(keyboardMode),
                                                     (System.currentTimeMillis() - startTime),
                                                     target,
-                                                    "to-list",
+                                                    "auto-switch",
                                                     inputString,
                                                     listview.getAdapter().getCount(),
                                                     sourceList.indexOf(target)
                                             );
+                                            autoToListTime = System.currentTimeMillis();
                                             keyboardContainer.setVisibility(View.GONE);
                                         }
                                         break;
@@ -507,11 +525,12 @@ public class TaskActivity extends WearableActivity {
                                                     changeKeyboardModeTypeAtLog(keyboardMode),
                                                     (System.currentTimeMillis() - startTime),
                                                     target,
-                                                    "to-list",
+                                                    "auto-switch",
                                                     inputString,
                                                     listview.getAdapter().getCount(),
                                                     sourceList.indexOf(target)
                                             );
+                                            autoToListTime = System.currentTimeMillis();
                                             keyboardContainer.setVisibility(View.GONE);
                                         }
                                         break;
@@ -524,11 +543,12 @@ public class TaskActivity extends WearableActivity {
                                                     changeKeyboardModeTypeAtLog(keyboardMode),
                                                     (System.currentTimeMillis() - startTime),
                                                     target,
-                                                    "to-list",
+                                                    "auto-switch",
                                                     inputString,
                                                     listview.getAdapter().getCount(),
                                                     sourceList.indexOf(target)
                                             );
+                                            autoToListTime = System.currentTimeMillis();
                                             keyboardContainer.setVisibility(View.GONE);
                                         }
                                         break;
@@ -679,9 +699,13 @@ public class TaskActivity extends WearableActivity {
         placeholderContainer.removeAllViews();
         if (keyboardMode != ISI) {
             placeholderContainer.addView(placeholderTextView);
-            searchView.setVisibility(View.VISIBLE);
         } else {
             placeholderContainer.addView(placeholderRecyclerView);
+        }
+
+        if (keyboardMode == LSI) {
+            searchView.setVisibility(View.VISIBLE);
+        } else {
             searchView.setVisibility(View.INVISIBLE);
         }
     }
