@@ -51,8 +51,8 @@ public class TaskActivity extends WearableActivity {
 
     static final int REQUEST_CODE_FILE = 1;
 
-    String ip = "143.248.56.249";
-    // String ip = "143.248.53.191";
+    // String ip = "143.248.56.249";
+    String ip = "143.248.53.191";
     int port = 5000;
 
     Socket socket;
@@ -138,6 +138,7 @@ public class TaskActivity extends WearableActivity {
 
         jobScheduler = new Timer();
 
+        inputString = "";
         listSize = 0;
         trial = 0;
         trialLimit = 5;
@@ -167,9 +168,6 @@ public class TaskActivity extends WearableActivity {
         taskView = (ViewGroup) findViewById(R.id.task);
         taskEndView = (TextView) findViewById(R.id.task_end);
 
-        // Init
-        taskEndView.setVisibility(View.GONE);
-
         setupLogger(userNum);
 
         if (userNum == 0) {
@@ -186,7 +184,16 @@ public class TaskActivity extends WearableActivity {
         initKeyboardContainer();
 
         targetIndexList = Util.predefineRandom(listSize, trialLimit + 1);
-        setNextTask();
+
+        String taskEndIndicator = listSize + "\n" + changeKeyboardModeType(keyboardMode);
+        taskEndView.setText(taskEndIndicator);
+        taskEndView.setVisibility(View.VISIBLE);
+        taskEndView.bringToFront();
+
+        new Handler().postDelayed(() -> {
+            taskEndView.setVisibility(View.GONE);
+            setNextTask();
+        }, 5000);
     }
 
     public void setupLogger(int userNum) {
@@ -1045,9 +1052,6 @@ public class TaskActivity extends WearableActivity {
             setSentence();
 
             String taskStartIndicator = (trial + 1) + "/" + (trialLimit + 1) + "\n" + target;
-            if (taskTrial == 0 && trial == 0) {
-                taskStartIndicator = listSize + "\n" + changeKeyboardModeType(keyboardMode) + "\n" + taskStartIndicator;
-            }
             startView.setText(taskStartIndicator);
             startView.setVisibility(View.VISIBLE);
             startView.bringToFront();
