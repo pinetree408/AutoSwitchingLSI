@@ -26,7 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.pinetree408.research.watchtapboard.exp.source.Source;
-import com.pinetree408.research.watchtapboard.exp.tasklist.ExpTwoTaskList;
+import com.pinetree408.research.watchtapboard.exp.tasklist.ExpThreeTaskList;
 import com.pinetree408.research.watchtapboard.util.KeyBoardView;
 import com.pinetree408.research.watchtapboard.util.Logger;
 import com.pinetree408.research.watchtapboard.util.Util;
@@ -955,7 +955,7 @@ public class TaskActivity extends WearableActivity {
 
     public void setTaskList(int userNum) {
         try {
-            Field[] fields = ExpTwoTaskList.class.getDeclaredFields();
+            Field[] fields = ExpThreeTaskList.class.getDeclaredFields();
             HashMap<String, String[]> taskListSet = new HashMap<>();
             for (Field f : fields) {
                 if (f.get(null) instanceof String[]) {
