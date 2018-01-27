@@ -332,7 +332,7 @@ public class TaskActivity extends WearableActivity {
                             // tap
                             if (tempY < placeholderContainer.getY()) {
                                 if ((keyBoardView.getX() + (keyBoardView.getWidth() / 2)) < tempX) {
-                                    if (keyboardMode == LSI) {
+                                    if (keyboardMode != ISI) {
                                         logger.fileWriteLog(
                                                 taskTrial,
                                                 trial,
@@ -710,7 +710,7 @@ public class TaskActivity extends WearableActivity {
             placeholderContainer.addView(placeholderRecyclerView);
         }
 
-        if (keyboardMode == LSI) {
+        if (keyboardMode != ISI) {
             searchView.setVisibility(View.VISIBLE);
         } else {
             searchView.setVisibility(View.INVISIBLE);
