@@ -22,6 +22,17 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:textAlignment="center"
+        android:gravity="center"
+        android:textSize="30dp"
+        android:background="@color/white"
+        android:textColor="@color/black"
+        android:id="@+id/err"
+        />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:id="@+id/success"
         android:clickable="false"
         />
@@ -91,14 +102,15 @@
                     android:layout_weight="5"
                     />
             </LinearLayout>
-            <LinearLayout
-                android:orientation="horizontal"
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:id="@+id/place_holder"
+                android:textColor="@color/green"
+                android:textAlignment="center"
+                android:gravity="center"
                 android:layout_weight="1"
-                >
-            </LinearLayout>
+                />
             <com.pinetree408.research.watchtapboard.util.KeyBoardView
                 android:id="@+id/tapboard"
                 android:layout_width="match_parent"
