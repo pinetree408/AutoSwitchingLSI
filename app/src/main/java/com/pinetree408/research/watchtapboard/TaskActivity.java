@@ -23,7 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.pinetree408.research.watchtapboard.exp.source.Source;
-import com.pinetree408.research.watchtapboard.exp.tasklist.ExpThreeTaskList;
+import com.pinetree408.research.watchtapboard.exp.tasklist.ExpFourTaskList;
 import com.pinetree408.research.watchtapboard.util.KeyBoardView;
 import com.pinetree408.research.watchtapboard.util.Logger;
 import com.pinetree408.research.watchtapboard.util.Util;
@@ -306,7 +306,7 @@ public class TaskActivity extends WearableActivity {
                                     case LSI:
                                         break;
                                     case ONE_ALSI:
-                                        if (inputString.length() >= 1 && sourceList.size() > 0) {
+                                        if (sourceList.size() <= 3 && sourceList.size() > 0) {
                                             logger.fileWriteLog(
                                                     taskTrial,
                                                     trial,
@@ -324,7 +324,7 @@ public class TaskActivity extends WearableActivity {
                                         }
                                         break;
                                     case TWO_ALSI:
-                                        if (inputString.length() >= 2 && sourceList.size() > 0) {
+                                        if (sourceList.size() <= 7 && sourceList.size() > 0) {
                                             logger.fileWriteLog(
                                                     taskTrial,
                                                     trial,
@@ -342,7 +342,7 @@ public class TaskActivity extends WearableActivity {
                                         }
                                         break;
                                     case THREE_ALSI:
-                                        if (inputString.length() >= 3 && sourceList.size() > 0) {
+                                        if (sourceList.size() <= 14 && sourceList.size() > 0) {
                                             logger.fileWriteLog(
                                                     taskTrial,
                                                     trial,
@@ -402,7 +402,7 @@ public class TaskActivity extends WearableActivity {
                                     case LSI:
                                         break;
                                     case ONE_ALSI:
-                                        if (inputString.length() >= 1 && sourceList.size() > 0) {
+                                        if (sourceList.size() <= 3 && sourceList.size() > 0) {
                                             logger.fileWriteLog(
                                                     taskTrial,
                                                     trial,
@@ -420,7 +420,7 @@ public class TaskActivity extends WearableActivity {
                                         }
                                         break;
                                     case TWO_ALSI:
-                                        if (inputString.length() >= 2 && sourceList.size() > 0) {
+                                        if (sourceList.size() <= 7 && sourceList.size() > 0) {
                                             logger.fileWriteLog(
                                                     taskTrial,
                                                     trial,
@@ -438,7 +438,7 @@ public class TaskActivity extends WearableActivity {
                                         }
                                         break;
                                     case THREE_ALSI:
-                                        if (inputString.length() >= 3 && sourceList.size() > 0) {
+                                        if (sourceList.size() <= 14 && sourceList.size() > 0) {
                                             logger.fileWriteLog(
                                                     taskTrial,
                                                     trial,
@@ -668,7 +668,7 @@ public class TaskActivity extends WearableActivity {
 
     public void setTaskList(int userNum) {
         try {
-            Field[] fields = ExpThreeTaskList.class.getDeclaredFields();
+            Field[] fields = ExpFourTaskList.class.getDeclaredFields();
             HashMap<String, String[]> taskListSet = new HashMap<>();
             for (Field f : fields) {
                 if (f.get(null) instanceof String[]) {
@@ -696,13 +696,13 @@ public class TaskActivity extends WearableActivity {
                 keyboardModeString = "Manual switch";
                 break;
             case ONE_ALSI:
-                keyboardModeString = "Auto switch on 1 type";
+                keyboardModeString = "Auto switch on length size 3";
                 break;
             case TWO_ALSI:
-                keyboardModeString = "Auto switch on 2 type";
+                keyboardModeString = "Auto switch on length size 7";
                 break;
             case THREE_ALSI:
-                keyboardModeString = "Auto switch on 3 type";
+                keyboardModeString = "Auto switch on length size 14";
                 break;
         }
         return keyboardModeString;
@@ -764,13 +764,13 @@ public class TaskActivity extends WearableActivity {
                     indicatorView.setText("");
                     break;
                 case ONE_ALSI:
-                    indicatorView.setText("1");
+                    indicatorView.setText("3");
                     break;
                 case TWO_ALSI:
-                    indicatorView.setText("2");
+                    indicatorView.setText("7");
                     break;
                 case THREE_ALSI:
-                    indicatorView.setText("3");
+                    indicatorView.setText("14");
                     break;
             }
 
