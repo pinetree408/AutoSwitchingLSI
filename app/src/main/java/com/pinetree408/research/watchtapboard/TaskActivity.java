@@ -569,7 +569,6 @@ public class TaskActivity extends WearableActivity {
                     sourceList.indexOf(target)
             );
 
-            startTime = System.currentTimeMillis();
             listview.setSelectionAfterHeaderView();
             err = err + 1;
             String styledText = target + "<br/><font color='red'>" + err + "/5</font>";
@@ -578,6 +577,7 @@ public class TaskActivity extends WearableActivity {
             errView.setVisibility(View.VISIBLE);
 
             new Handler().postDelayed(() -> {
+                startTime = System.currentTimeMillis();
                 taskView.setVisibility(View.VISIBLE);
                 if (keyboardMode != LI) {
                     keyboardContainer.setVisibility(View.VISIBLE);
@@ -696,13 +696,13 @@ public class TaskActivity extends WearableActivity {
                 keyboardModeString = "Manual switch";
                 break;
             case ONE_ALSI:
-                keyboardModeString = "Auto switch on length size 3";
+                keyboardModeString = "Auto switch on list size 3";
                 break;
             case TWO_ALSI:
-                keyboardModeString = "Auto switch on length size 7";
+                keyboardModeString = "Auto switch on list size 7";
                 break;
             case THREE_ALSI:
-                keyboardModeString = "Auto switch on length size 14";
+                keyboardModeString = "Auto switch on list size 14";
                 break;
         }
         return keyboardModeString;
