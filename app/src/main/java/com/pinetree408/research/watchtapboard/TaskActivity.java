@@ -324,7 +324,7 @@ public class TaskActivity extends WearableActivity {
                                         }
                                         break;
                                     case TWO_ALSI:
-                                        if (sourceList.size() <= 7 && sourceList.size() > 0) {
+                                        if (sourceList.size() <= 6 && sourceList.size() > 0) {
                                             logger.fileWriteLog(
                                                     taskTrial,
                                                     trial,
@@ -342,7 +342,7 @@ public class TaskActivity extends WearableActivity {
                                         }
                                         break;
                                     case THREE_ALSI:
-                                        if (sourceList.size() <= 14 && sourceList.size() > 0) {
+                                        if (sourceList.size() <= 12 && sourceList.size() > 0) {
                                             logger.fileWriteLog(
                                                     taskTrial,
                                                     trial,
@@ -420,7 +420,7 @@ public class TaskActivity extends WearableActivity {
                                         }
                                         break;
                                     case TWO_ALSI:
-                                        if (sourceList.size() <= 7 && sourceList.size() > 0) {
+                                        if (sourceList.size() <= 6 && sourceList.size() > 0) {
                                             logger.fileWriteLog(
                                                     taskTrial,
                                                     trial,
@@ -438,7 +438,7 @@ public class TaskActivity extends WearableActivity {
                                         }
                                         break;
                                     case THREE_ALSI:
-                                        if (sourceList.size() <= 14 && sourceList.size() > 0) {
+                                        if (sourceList.size() <= 12 && sourceList.size() > 0) {
                                             logger.fileWriteLog(
                                                     taskTrial,
                                                     trial,
@@ -699,10 +699,10 @@ public class TaskActivity extends WearableActivity {
                 keyboardModeString = "Auto switch on list size 3";
                 break;
             case TWO_ALSI:
-                keyboardModeString = "Auto switch on list size 7";
+                keyboardModeString = "Auto switch on list size 6";
                 break;
             case THREE_ALSI:
-                keyboardModeString = "Auto switch on list size 14";
+                keyboardModeString = "Auto switch on list size 12";
                 break;
         }
         return keyboardModeString;
@@ -767,10 +767,10 @@ public class TaskActivity extends WearableActivity {
                     indicatorView.setText("3");
                     break;
                 case TWO_ALSI:
-                    indicatorView.setText("7");
+                    indicatorView.setText("6");
                     break;
                 case THREE_ALSI:
-                    indicatorView.setText("14");
+                    indicatorView.setText("12");
                     break;
             }
 
