@@ -44,7 +44,7 @@
  *      strength random number generator in Java.
  *
  ******************************************************************************/
-package com.pinetree408.research.watchtapboard.util;
+package com.pinetree408.research.autoswitchinglsi.util;
 import java.util.Random;
 
 /**

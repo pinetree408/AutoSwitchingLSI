@@ -1,4 +1,4 @@
-package com.pinetree408.research.watchtapboard;
+package com.pinetree408.research.autoswitchinglsi;
 
 import android.Manifest;
 import android.content.Intent;

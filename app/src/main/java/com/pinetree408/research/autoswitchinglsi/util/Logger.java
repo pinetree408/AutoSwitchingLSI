@@ -1,4 +1,4 @@
-package com.pinetree408.research.watchtapboard.util;
+package com.pinetree408.research.autoswitchinglsi.util;
 
 import android.util.Log;
 

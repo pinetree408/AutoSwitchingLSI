@@ -1,4 +1,4 @@
-package com.pinetree408.research.watchtapboard;
+package com.pinetree408.research.autoswitchinglsi;
 
 import android.Manifest;
 import android.content.Intent;
@@ -22,11 +22,11 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.pinetree408.research.watchtapboard.exp.source.Source;
-import com.pinetree408.research.watchtapboard.exp.tasklist.ExpFourTaskList;
-import com.pinetree408.research.watchtapboard.util.KeyBoardView;
-import com.pinetree408.research.watchtapboard.util.Logger;
-import com.pinetree408.research.watchtapboard.util.Util;
+import com.pinetree408.research.autoswitchinglsi.exp.source.Source;
+import com.pinetree408.research.autoswitchinglsi.exp.tasklist.ExpFourTaskList;
+import com.pinetree408.research.autoswitchinglsi.view.KeyBoardView;
+import com.pinetree408.research.autoswitchinglsi.util.Logger;
+import com.pinetree408.research.autoswitchinglsi.util.Util;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;

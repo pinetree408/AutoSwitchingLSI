@@ -1,8 +1,4 @@
-package com.pinetree408.research.watchtapboard.util;
-
-/**
- * Created by leesangyoon on 2017. 12. 22..
- */
+package com.pinetree408.research.autoswitchinglsi.util;
 
 public class Util {
 

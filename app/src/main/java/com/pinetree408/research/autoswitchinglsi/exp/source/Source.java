@@ -1,8 +1,4 @@
-package com.pinetree408.research.watchtapboard.exp.source;
-
-/**
- * Created by leesangyoon on 2017. 8. 15..
- */
+package com.pinetree408.research.autoswitchinglsi.exp.source;
 
 public class Source {
 

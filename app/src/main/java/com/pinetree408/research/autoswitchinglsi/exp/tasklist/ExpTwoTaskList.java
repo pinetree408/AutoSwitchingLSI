@@ -1,8 +1,4 @@
-package com.pinetree408.research.watchtapboard.exp.tasklist;
-
-/**
- * Created by leesangyoon on 2018. 1. 24..
- */
+package com.pinetree408.research.autoswitchinglsi.exp.tasklist;
 
 public class ExpTwoTaskList {
 

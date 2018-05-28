@@ -1,8 +1,4 @@
-package com.pinetree408.research.watchtapboard.util;
-
-/**
- * Created by leesangyoon on 2017. 8. 15..
- */
+package com.pinetree408.research.autoswitchinglsi.view;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -12,14 +8,11 @@ import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
 
-import com.pinetree408.research.watchtapboard.R;
+import com.pinetree408.research.autoswitchinglsi.R;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * TODO: document your custom view class.
- */
 public class KeyBoardView extends View {
 
     public char[] keyboardCharList = {
@@ -78,7 +71,7 @@ public class KeyBoardView extends View {
     private void init(AttributeSet attrs, int defStyle) {
         // Load attributes
         final TypedArray a = getContext().obtainStyledAttributes(
-                attrs, R.styleable.TapBoardView, defStyle, 0);
+                attrs, R.styleable.KeyBoardView, defStyle, 0);
         a.recycle();
 
         keyboardPaint = new Paint();
