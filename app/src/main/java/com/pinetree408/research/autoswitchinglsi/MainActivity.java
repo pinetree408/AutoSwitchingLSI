@@ -47,6 +47,7 @@ public class MainActivity extends WearableActivity {
                     Intent intent = new Intent(this, TaskActivity.class);
                     intent.putExtra("userNum", userNum);
                     startActivity(intent);
+                    v.performClick();
                     break;
             }
             return true;

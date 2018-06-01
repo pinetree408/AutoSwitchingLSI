@@ -127,7 +127,5 @@ public class KeyBoardView extends View {
                         keyboardPaint);
             }
         }
-
     }
-
 }
