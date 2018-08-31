@@ -23,7 +23,7 @@ import android.widget.Toast;
 
 import com.pinetree408.research.autoswitchinglsi.databinding.ActivityTaskBinding;
 import com.pinetree408.research.autoswitchinglsi.exp.source.Source;
-import com.pinetree408.research.autoswitchinglsi.exp.tasklist.ExpFourTaskList;
+import com.pinetree408.research.autoswitchinglsi.exp.tasklist.SampleTaskList;
 import com.pinetree408.research.autoswitchinglsi.util.Logger;
 import com.pinetree408.research.autoswitchinglsi.util.Util;
 
@@ -63,9 +63,12 @@ public class TaskActivity extends WearableActivity {
 
     static final int LI = 0;
     static final int LSI = 1;
-    static final int ONE_ALSI = 3;
-    static final int TWO_ALSI = 4;
-    static final int THREE_ALSI = 5;
+    static final int ONE_LALSI = 3;
+    static final int TWO_LALSI = 4;
+    static final int THREE_LALSI = 5;
+    static final int ONE_IALSI = 6;
+    static final int TWO_IALSI = 7;
+    static final int THREE_IALSI = 8;
 
     int keyboardMode;
     View returnKeyboardView;
@@ -159,9 +162,12 @@ public class TaskActivity extends WearableActivity {
                     case LSI:
                         checkSelectedItem((TextView) view);
                         break;
-                    case ONE_ALSI:
-                    case TWO_ALSI:
-                    case THREE_ALSI:
+                    case ONE_LALSI:
+                    case TWO_LALSI:
+                    case THREE_LALSI:
+                    case ONE_IALSI:
+                    case TWO_IALSI:
+                    case THREE_IALSI:
                         if ((System.currentTimeMillis() - autoToListTime) >= 500) {
                             checkSelectedItem((TextView) view);
                         }
@@ -262,9 +268,12 @@ public class TaskActivity extends WearableActivity {
                                     case LI:
                                         break;
                                     case LSI:
-                                    case ONE_ALSI:
-                                    case TWO_ALSI:
-                                    case THREE_ALSI:
+                                    case ONE_LALSI:
+                                    case TWO_LALSI:
+                                    case THREE_LALSI:
+                                    case ONE_IALSI:
+                                    case TWO_IALSI:
+                                    case THREE_IALSI:
                                         binding.input.setText(inputString);
                                         if (sourceList.size() != 0 && !inputString.equals("")) {
                                             binding.placeHolder.setText(sourceList.get(0));
@@ -278,7 +287,7 @@ public class TaskActivity extends WearableActivity {
                                     case LI:
                                     case LSI:
                                         break;
-                                    case ONE_ALSI:
+                                    case ONE_LALSI:
                                         if (sourceList.size() <= 3 && sourceList.size() > 0) {
                                             logger.fileWriteLog(
                                                     taskTrial,
@@ -296,7 +305,7 @@ public class TaskActivity extends WearableActivity {
                                             binding.keyboardContainer.setVisibility(View.GONE);
                                         }
                                         break;
-                                    case TWO_ALSI:
+                                    case TWO_LALSI:
                                         if (sourceList.size() <= 6 && sourceList.size() > 0) {
                                             logger.fileWriteLog(
                                                     taskTrial,
@@ -314,8 +323,62 @@ public class TaskActivity extends WearableActivity {
                                             binding.keyboardContainer.setVisibility(View.GONE);
                                         }
                                         break;
-                                    case THREE_ALSI:
+                                    case THREE_LALSI:
                                         if (sourceList.size() <= 12 && sourceList.size() > 0) {
+                                            logger.fileWriteLog(
+                                                    taskTrial,
+                                                    trial,
+                                                    originSourceList.size(),
+                                                    changeKeyboardModeTypeAtLog(keyboardMode),
+                                                    (System.currentTimeMillis() - startTime),
+                                                    target,
+                                                    "auto-switch",
+                                                    inputString,
+                                                    binding.listView.getAdapter().getCount(),
+                                                    sourceList.indexOf(target)
+                                            );
+                                            autoToListTime = System.currentTimeMillis();
+                                            binding.keyboardContainer.setVisibility(View.GONE);
+                                        }
+                                        break;
+                                    case ONE_IALSI:
+                                        if (inputString.length() >= 1 && sourceList.size() > 0) {
+                                            logger.fileWriteLog(
+                                                    taskTrial,
+                                                    trial,
+                                                    originSourceList.size(),
+                                                    changeKeyboardModeTypeAtLog(keyboardMode),
+                                                    (System.currentTimeMillis() - startTime),
+                                                    target,
+                                                    "auto-switch",
+                                                    inputString,
+                                                    binding.listView.getAdapter().getCount(),
+                                                    sourceList.indexOf(target)
+                                            );
+                                            autoToListTime = System.currentTimeMillis();
+                                            binding.keyboardContainer.setVisibility(View.GONE);
+                                        }
+                                        break;
+                                    case TWO_IALSI:
+                                        if (inputString.length() >= 2 && sourceList.size() > 0) {
+                                            logger.fileWriteLog(
+                                                    taskTrial,
+                                                    trial,
+                                                    originSourceList.size(),
+                                                    changeKeyboardModeTypeAtLog(keyboardMode),
+                                                    (System.currentTimeMillis() - startTime),
+                                                    target,
+                                                    "auto-switch",
+                                                    inputString,
+                                                    binding.listView.getAdapter().getCount(),
+                                                    sourceList.indexOf(target)
+                                            );
+                                            autoToListTime = System.currentTimeMillis();
+                                            binding.keyboardContainer.setVisibility(View.GONE);
+                                        }
+                                        break;
+                                    case THREE_IALSI:
+                                        if (inputString.length() >= 3 && sourceList.size() > 0) {
                                             logger.fileWriteLog(
                                                     taskTrial,
                                                     trial,
@@ -374,7 +437,7 @@ public class TaskActivity extends WearableActivity {
                                     case LI:
                                     case LSI:
                                         break;
-                                    case ONE_ALSI:
+                                    case ONE_LALSI:
                                         if (sourceList.size() <= 3 && sourceList.size() > 0) {
                                             logger.fileWriteLog(
                                                     taskTrial,
@@ -392,7 +455,7 @@ public class TaskActivity extends WearableActivity {
                                             binding.keyboardContainer.setVisibility(View.GONE);
                                         }
                                         break;
-                                    case TWO_ALSI:
+                                    case TWO_LALSI:
                                         if (sourceList.size() <= 6 && sourceList.size() > 0) {
                                             logger.fileWriteLog(
                                                     taskTrial,
@@ -410,8 +473,62 @@ public class TaskActivity extends WearableActivity {
                                             binding.keyboardContainer.setVisibility(View.GONE);
                                         }
                                         break;
-                                    case THREE_ALSI:
+                                    case THREE_LALSI:
                                         if (sourceList.size() <= 12 && sourceList.size() > 0) {
+                                            logger.fileWriteLog(
+                                                    taskTrial,
+                                                    trial,
+                                                    originSourceList.size(),
+                                                    changeKeyboardModeTypeAtLog(keyboardMode),
+                                                    (System.currentTimeMillis() - startTime),
+                                                    target,
+                                                    "auto-switch",
+                                                    inputString,
+                                                    binding.listView.getAdapter().getCount(),
+                                                    sourceList.indexOf(target)
+                                            );
+                                            autoToListTime = System.currentTimeMillis();
+                                            binding.keyboardContainer.setVisibility(View.GONE);
+                                        }
+                                        break;
+                                    case ONE_IALSI:
+                                        if (inputString.length() >= 1 && sourceList.size() > 0) {
+                                            logger.fileWriteLog(
+                                                    taskTrial,
+                                                    trial,
+                                                    originSourceList.size(),
+                                                    changeKeyboardModeTypeAtLog(keyboardMode),
+                                                    (System.currentTimeMillis() - startTime),
+                                                    target,
+                                                    "auto-switch",
+                                                    inputString,
+                                                    binding.listView.getAdapter().getCount(),
+                                                    sourceList.indexOf(target)
+                                            );
+                                            autoToListTime = System.currentTimeMillis();
+                                            binding.keyboardContainer.setVisibility(View.GONE);
+                                        }
+                                        break;
+                                    case TWO_IALSI:
+                                        if (inputString.length() >= 2 && sourceList.size() > 0) {
+                                            logger.fileWriteLog(
+                                                    taskTrial,
+                                                    trial,
+                                                    originSourceList.size(),
+                                                    changeKeyboardModeTypeAtLog(keyboardMode),
+                                                    (System.currentTimeMillis() - startTime),
+                                                    target,
+                                                    "auto-switch",
+                                                    inputString,
+                                                    binding.listView.getAdapter().getCount(),
+                                                    sourceList.indexOf(target)
+                                            );
+                                            autoToListTime = System.currentTimeMillis();
+                                            binding.keyboardContainer.setVisibility(View.GONE);
+                                        }
+                                        break;
+                                    case THREE_IALSI:
+                                        if (inputString.length() >= 3 && sourceList.size() > 0) {
                                             logger.fileWriteLog(
                                                     taskTrial,
                                                     trial,
@@ -628,21 +745,29 @@ public class TaskActivity extends WearableActivity {
             case "LSI":
                 keyboardMode = LSI;
                 break;
-            case "1-ALSI":
-                keyboardMode = ONE_ALSI;
+            case "1-IALSI":
+                keyboardMode = ONE_IALSI;
                 break;
-            case "2-ALSI":
-                keyboardMode = TWO_ALSI;
+            case "2-IALSI":
+                keyboardMode = TWO_IALSI;
                 break;
-            case "3-ALSI":
-                keyboardMode = THREE_ALSI;
+            case "3-IALSI":
+                keyboardMode = THREE_IALSI;
+            case "1-LALSI":
+                keyboardMode = ONE_LALSI;
+                break;
+            case "2-LALSI":
+                keyboardMode = TWO_LALSI;
+                break;
+            case "3-LALSI":
+                keyboardMode = THREE_LALSI;
                 break;
         }
     }
 
     public void setTaskList(int userNum) {
         try {
-            Field[] fields = ExpFourTaskList.class.getDeclaredFields();
+            Field[] fields = SampleTaskList.class.getDeclaredFields();
             HashMap<String, String[]> taskListSet = new HashMap<>();
             for (Field f : fields) {
                 if (f.get(null) instanceof String[]) {
@@ -669,14 +794,23 @@ public class TaskActivity extends WearableActivity {
             case LSI:
                 keyboardModeString = "Manual switch";
                 break;
-            case ONE_ALSI:
+            case ONE_LALSI:
                 keyboardModeString = "Auto switch on list size 3";
                 break;
-            case TWO_ALSI:
+            case TWO_LALSI:
                 keyboardModeString = "Auto switch on list size 6";
                 break;
-            case THREE_ALSI:
+            case THREE_LALSI:
                 keyboardModeString = "Auto switch on list size 12";
+                break;
+            case ONE_IALSI:
+                keyboardModeString = "Auto switch on 1 type";
+                break;
+            case TWO_IALSI:
+                keyboardModeString = "Auto switch on 2 type";
+                break;
+            case THREE_IALSI:
+                keyboardModeString = "Auto switch on 3 type";
                 break;
         }
         return keyboardModeString;
@@ -691,14 +825,23 @@ public class TaskActivity extends WearableActivity {
             case LSI:
                 keyboardModeString = "LSI";
                 break;
-            case ONE_ALSI:
-                keyboardModeString = "1-ALSI";
+            case ONE_IALSI:
+                keyboardModeString = "1-IALSI";
                 break;
-            case TWO_ALSI:
-                keyboardModeString = "2-ALSI";
+            case TWO_IALSI:
+                keyboardModeString = "2-IALSI";
                 break;
-            case THREE_ALSI:
-                keyboardModeString = "3-ALSI";
+            case THREE_IALSI:
+                keyboardModeString = "3-IALSI";
+                break;
+            case ONE_LALSI:
+                keyboardModeString = "1-LALSI";
+                break;
+            case TWO_LALSI:
+                keyboardModeString = "2-LALSI";
+                break;
+            case THREE_LALSI:
+                keyboardModeString = "3-LALSI";
                 break;
         }
         return keyboardModeString;
@@ -737,14 +880,23 @@ public class TaskActivity extends WearableActivity {
                 case LSI:
                     binding.indicator.setText("");
                     break;
-                case ONE_ALSI:
+                case ONE_LALSI:
                     binding.indicator.setText("3");
                     break;
-                case TWO_ALSI:
+                case TWO_LALSI:
                     binding.indicator.setText("6");
                     break;
-                case THREE_ALSI:
+                case THREE_LALSI:
                     binding.indicator.setText("12");
+                    break;
+                case ONE_IALSI:
+                    binding.indicator.setText("1");
+                    break;
+                case TWO_IALSI:
+                    binding.indicator.setText("2");
+                    break;
+                case THREE_IALSI:
+                    binding.indicator.setText("3");
                     break;
             }
 
